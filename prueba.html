@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte Agroclimático Mensual</title>
+  <!-- Google Fonts & Chart.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 24px;
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Encabezado */
+    header {
+      background: var(--card-bg);
+      padding: 20px 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .station-info h1 { margin: 0 0 4px 0; font-size: 1.5rem; color: var(--text-main); }
+    .station-info p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+    .report-date { text-align: right; font-weight: 600; color: var(--primary); }
+
+    /* Tarjetas KPI */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .kpi-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+    .kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); }
+    .kpi-subtext { font-size: 0.8rem; margin-top: 6px; }
+    .kpi-subtext.positive { color: var(--accent-green); }
+    .kpi-subtext.warning { color: var(--accent-orange); }
+
+    /* Sección de Gráficos */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .chart-card h2 { margin: 0 0 16px 0; font-size: 1.1rem; }
+
+    /* Resumen Agronómico */
+    .agronomic-summary {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 8px;
+    }
+
+    .agronomic-summary h3 { margin: 0 0 8px 0; font-size: 1rem; color: #1e40af; }
+    .agronomic-summary p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: #1e3a8a; }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  
+  <!-- Encabezado -->
+  <header>
+    <div class="station-info">
+      <h1>Estación Meteorológica "Don Pedro"</h1>
+      <p>Ubicación: Valle de Lerma, Salta | ID: EMA-4502</p>
+    </div>
+    <div class="report-date">
+      <span>Reporte Mensual</span><br>
+      <small style="color: var(--text-muted);">Agosto 2026</small>
+    </div>
+  </header>
+
+  <!-- Tarjetas KPI (Indicadores Clave) -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-title">Precipitación Total</div>
+      <div class="kpi-value">48.5 mm</div>
+      <div class="kpi-subtext positive">▲ +12% vs. media histórica</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Temp. Promedio</div>
+      <div class="kpi-value">16.4 °C</div>
+      <div class="kpi-subtext">Mín: 3.1°C | Máj: 28.5°C</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Evapotranspiración (ETP)</div>
+      <div class="kpi-value">82.1 mm</div>
+      <div class="kpi-subtext warning">Balance hídrico negativo (-33.6 mm)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Eventos de Helada</div>
+      <div class="kpi-value">2 días</div>
+      <div class="kpi-subtext">Temp &lt; 0°C a nivel de suelo</div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Gráficos -->
+  <div class="charts-grid">
+    
+    <!-- Gráfico Combinado: Temp + Lluvia -->
+    <div class="chart-card">
+      <h2>Temperaturas Diarias y Precipitación</h2>
+      <canvas id="tempRainChart"></canvas>
+    </div>
+
+    <!-- Gráfico de Viento / Humedad -->
+    <div class="chart-card">
+      <h2>Ráfagas Máximas de Viento (km/h)</h2>
+      <canvas id="windChart"></canvas>
+    </div>
+
+  </div>
+
+  <!-- Comentario / Informe Agronómico -->
+  <div class="agronomic-summary">
+    <h3>💡 Diagnóstico Agronómico del Mes</h3>
+    <p>
+      El acumulado de lluvias durante la segunda quincena permitió mantener buenos niveles de humedad en los primeros 20 cm del perfil de suelo. 
+      Sin embargo, la ETP superó la precipitación acumulada, por lo que se sugiere **activar el programa de riego complementario** para cultivos de invierno. 
+      Se registraron 2 días con ventanas de aplicación de fitosanitarios desfavorables debido a ráfagas de viento superiores a los 25 km/h.
+    </p>
+  </div>
+
+</div>
+
+<script>
+  // Configuración de Chart.js para el Gráfico Combinado (Lluvia + Temperatura)
+  const ctx1 = document.getElementById('tempRainChart').getContext('2d');
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: ['Día 1', 'Día 5', 'Día 10', 'Día 15', 'Día 20', 'Día 25', 'Día 30'],
+      datasets: [
+        {
+          label: 'Precipitación (mm)',
+          data: [0, 12, 0, 24.5, 0, 8, 4],
+          backgroundColor: 'rgba(37, 99, 235, 0.6)',
+          borderColor: '#2563eb',
+          borderWidth: 1,
+          yAxisID: 'yRain'
+        },
+        {
+          label: 'Temp. Máxima (°C)',
+          data: [22, 19, 25, 21, 28, 26, 23],
+          type: 'line',
+          borderColor: '#ef4444',
+          backgroundColor: '#ef4444',
+          tension: 0.3,
+          yAxisID: 'yTemp'
+        },
+        {
+          label: 'Temp. Mínima (°C)',
+          data: [5, 3, 8, 6, 11, 9, 4],
+          type: 'line',
+          borderColor: '#3b82f6',
+          backgroundColor: '#3b82f6',
+          tension: 0.3,
+          yAxisID: 'yTemp'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        yRain: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'Precipitación (mm)' },
+          grid: { display: false }
+        },
+        yTemp: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: 'Temperatura (°C)' }
+        }
+      }
+    }
+  });
+
+  // Gráfico de Viento
+  const ctx2 = document.getElementById('windChart').getContext('2d');
+  new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: ['Día 1', 'Día 5', 'Día 10', 'Día 15', 'Día 20', 'Día 25', 'Día 30'],
+      datasets: [{
+        label: 'Viento Máximo (km/h)',
+        data: [12, 18, 31, 15, 22, 28, 14],
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { title: { display: true, text: 'km/h' } }
+      }
+    }
+  });
+</script>
+
+</body>
+</html> 
