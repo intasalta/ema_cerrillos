@@ -1,0 +1,661 @@
+<html>
+<head>
+  <meta http-equiv="Content-Language" content="es">
+  <meta name="ProgId" content="FrontPage.Editor.Document">
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+ 
+  <title>Clima</title>
+  <style>
+<!--
+ .txttabla {font-size:0.7em; margin-top: 3px; margin-bottom: 4px; padding-right: 4px; padding-left: 4px;}
+-->
+
+  </style>
+</head>
+
+<body bgcolor="#0B7BAF" style="background-color: #0B7BAF">
+
+<div align="center">
+
+<center>
+
+<table border="0" cellpadding="2" cellspacing="0"
+style="border-collapse: collapse" width="960" bgcolor="#f6f6f6">
+  <tbody>
+    <tr>
+      <td width="957" colspan="2" bgcolor="#0B7BAF" height="18"> </td>
+    </tr>
+    <tr>
+      <td width="418" bgcolor="#0B7BAF" height="97"><p align="left">
+		<img border="0" src="https://ema.inta.gob.ar/eeasalta_cerrillos/Logo_INTA.jpg"></p>
+      </td>
+      <td width="542" bgcolor="#0B7BAF" height="97" valign="bottom">
+        <div align="right">
+        <h3 align="right"><span style="font-weight: 400"><font face="Verdana"
+        size="5" color="#FFFFFF">Estación Meteorológica</font></span></h3>
+        </div>
+
+        <div align="right">
+        <h3 align="right"><span style="font-weight: 400"><font face="Verdana"
+        size="5" color="#FFFFFF">Automática INTA CERRILLOS</font></span></h3>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td width="957" height="7" bgcolor="#0B7BAF" colspan="2"> </td>
+	  
+    </tr>
+	
+	<tr>
+      <td width="957" height="7" bgcolor="#6699FF" colspan="2"><p
+        align="center"><font color="#FFFFFF"><font size="2"><a
+        href="https://ema.inta.gob.ar/"><font
+        color="#FFFFFF">Inicio</font> </a>| <a target="_blank"
+        href="downld02.txt"><font color="#FFFFFF">Reporte 2 días</font></a> |
+        <a target="_blank" href="downld08.txt" name="Reporte"
+        id="Reporte"><font color="#FFFFFF">Reporte 7 días</font></a> | <a
+        target="_blank" href="NOAAMO.TXT"><font color="#FFFFFF">Reporte
+        mensual</font></a> | <a target="_blank" href="NOAAPRMO.TXT"><font
+        color="#FFFFFF">Reporte mes anterior</font></a> | <a target="_blank"
+        href="NOAAYR.TXT"><font color="#FFFFFF">Reporte anual</font></a> | <a
+        target="_blank" href="NOAAPRYR.TXT"><font color="#FFFFFF">Reporte año
+        anterior</font></a> | <a target="_blank"
+        href="https://docs.google.com/spreadsheets/d/e/2PACX-1vT7aA1iv_SP6XqV36w-hS8-TsIiBD2u4WlF0RFtgafbW9eIpOBKfZtBJczf_H_hx_jf6ZXLgVYDf5lf/pubhtml"><font color="#FFFFFF">Datos Históricos</font></a> | 
+		</font> <a
+        href="mailto:eeasalta.rrnn@inta.gob.ar"><font size="2"
+        color="#FFFFFF">Contáctenos</font></a></font></p>
+      </td>
+    </tr>
+   
+   
+   
+   
+   
+   
+    <tr>
+      <td width="957" height="31" colspan="2"><h2><b>Datos Actuales del
+        Tiempo</b></h2>
+      </td>
+    </tr>
+    <tr>
+      <td width="957" height="31" colspan="2">
+           
+          
+          <h4> Lat 24° 53' 39" S | Long 65° 28' 15" O | 1235 msnm</h4>
+          
+          <h4>Ruta Nacional 68 Km 172, Cerrillos, Salta  </h4>
+          
+          <h4>Tipo: Davis <span lang="es">Vantage 2</span></h4>
+          
+          <hr>
+         
+          <h4>Fecha: <!--StationDate--><!--StationTime--></h4>
+         
+        </ul>
+
+        <h4 align="left"><b>Salida del sol: hs.
+        </b><!--<b>sunriseTime</b>--></h4>
+
+        <h4 align="left"><b>Puesta del sol: hs.
+        </b><!--<b>sunsetTime</b>--></h4>
+
+        
+        <hr>
+      </td>
+    </tr>
+    <tr>
+      <td width="957" height="31" colspan="2">
+        <table border="0" cellpadding="0" cellspacing="0"
+        style="border-collapse: collapse" width="956">
+          <tbody>
+            <tr>
+              <td width="320" valign="top" height="128"><p class="titeea"
+                align="center"><b>Temperatura</b></p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC"><b>Actual</b></td>
+                      <td width="67%" class="txttabla" colspan="2" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--outsideTemp-->
+                        <!--tempUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="12"
+                      bgcolor="#EDEBEC"> </td>
+                      <td width="33%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEBEC"><b>Mínima</b></td>
+                      <td width="34%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEBEC"><b>Máxima</b></td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC"><b>Diaria</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--lowOutsideTemp-->
+                        <!--tempUnit-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--hiOutsideTemp-->
+                        <!--tempUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC"><b>A hs:</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--lowOutsideTempTime-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--hiOutsideTempTime-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC"><b>Mensual</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--lowMonthlyOutsideTemp-->
+                        <!--tempUnit-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--hiMonthlyOutsideTemp-->
+                        <!--tempUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC"><b>Anual</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--lowYearlyOutsideTemp-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--hiYearlyOutsideTemp-->
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p> </p>
+              </td>
+              <td width="11" rowspan="2" height="366">  
+
+                <p></p>
+
+                <p> </p>
+              </td>
+              <td width="292" valign="top" colspan="4" height="128"><p
+                class="titeea" align="center"><b><span lang="es">Sensación
+                Térmica</span></b>  </p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="100%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC" colspan="2"
+                        align="center"><b>Temperatura y Viento</b></td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEBEC" align="left"><b>Actual</b></td>
+                      <td width="51%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEBEC"><!--windChill-->
+                        <!--tempUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="100%" class="txttabla" height="13" colspan="2"
+                      align="center" bgcolor="#EDEBEC"></td>
+                    </tr>
+                    <tr>
+                      <td width="100%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC" colspan="2"
+                        align="center"><b>Temperatura y Humedad</b> 
+
+                        <p><b><font size="1">(índice de calor)</font></b></p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="13"
+                      bgcolor="#EDEBEC" align="left"><b>Actual</b></td>
+                      <td width="51%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEBEC"><!--outsideHeatIndex-->
+                        <!--tempUnit-->
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p> </p>
+              </td>
+              <td width="9" rowspan="2" height="366"> </td>
+              <td width="324" valign="top" height="128"><p class="titeea"
+                align="center"><b>Humedad</b></p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Actual</b></td>
+                      <td width="67%" class="txttabla" colspan="2" height="13"
+                      align="center" bgcolor="#EDEDED"><!--outsideHumidity-->
+                        <!--humUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="12"
+                      bgcolor="#EDEDED"> </td>
+                      <td width="33%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"><b>Mínima</b></td>
+                      <td width="34%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"><b>Máxima</b></td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="9"
+                      bgcolor="#EDEDED"><b>Diaria</b></td>
+                      <td width="33%" class="txttabla" height="9"
+                      align="center" bgcolor="#EDEDED"><!--lowHumidity-->
+                        <!--humUnit-->
+                      </td>
+                      <td width="34%" class="txttabla" height="9"
+                      align="center" bgcolor="#EDEDED"><!--hiHumidity-->
+                        <!--humUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>A hs:</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><!--lowHumTime-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><!--hiHumTime-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Mensual</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><!--lowMonthlyHumidity-->
+                        <!--humUnit-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><!--hiMonthlyHumidity-->
+                        <!--humUnit-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="33%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Anual</b></td>
+                      <td width="33%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><!--lowYearlyHumidity-->
+                        <!--humUnit-->
+                      </td>
+                      <td width="34%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><!--hiYearlyHumidity-->
+                        <!--humUnit-->
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td width="320" align="center" height="238" valign="top"><b><img
+                border="0" src="OutsideTempHistory.gif"
+                alt="Temperatura exterior o ambiente (°C)"></b> 
+
+                <p class="txttabla"><b><font size="1">Temperatura ultimas 24
+                Hs</font></b></p>
+              </td>
+              <td width="142" valign="top" height="238" align="center"><b><img
+                border="0" src="WindChill.gif"
+                alt="Sensación térmica con la velocidad del viento  (°C) "></b> 
+
+                <p class="txttabla" align="center"><b><font
+                size="1">Temperatura y Viento</font></b></p>
+              </td>
+              <td width="7" valign="top" height="238" align="center"> </td>
+              <td width="12" valign="top" height="238" align="center"> </td>
+              <td width="131" valign="top" height="238" align="center"><b><img
+                border="0" src="HeatIndex.gif"></b> 
+
+                <p class="txttabla" align="center"><b><font
+                size="1">Temperatura y Humedad</font></b></p>
+              </td>
+              <td width="324" height="238" valign="top"><p
+                align="center"><b><img border="0"
+                src="OutsideHumidityHistory.gif"
+                alt="Humedad exterior o ambiente (%) "></b></p>
+
+                <p class="txttabla" align="center"><b><font size="1">Humedad
+                ultimas 24 Hs</font></b></p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+
+        <table border="0" cellpadding="0" cellspacing="0"
+        style="border-collapse: collapse" width="100%">
+          <tbody>
+            <tr>
+              <td width="48%" valign="top"><p class="titeea"
+                align="center"><b>Lluvia</b></p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="40%" class="txttabla" height="9"
+                      bgcolor="#EDEDED"><b>Lluvia del día:</b></td>
+                      <td width="60%" class="txttabla" height="9"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--dailyRain--> <!--rainUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Intensidad de lluvia:</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--rainRate--> <!--rateUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Total lluvia de la tormenta:</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--stormRain--> <!--rainUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Lluvia mensual:</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--monthlyRain--> <!--rainUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Lluvia anual :</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--totalRain--> <!--rainUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Evapotranspiración:</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--dailyEt--> <!--rainUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Evapotranspiración mensual:</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--monthlyEt--> <!--rainUnit--></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p class="titeea" align="center"> </p>
+              </td>
+              <td width="1%">  
+
+                <p> </p>
+
+                <p> </p>
+              </td>
+              <td width="51%" valign="top" colspan="4"><p class="titeea"
+                align="center"><b>Punto de Rocío</b></p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEDED" align="left"><b>Actual</b></td>
+                      <td width="51%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"><!--outsideDewPt-->
+                        <!--tempUnit-->
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p> </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="17%" valign="top" align="center"><b><img border="0"
+                src="ETHistory.gif" alt=""></b> 
+
+                <p class="piefoto"><b><font
+                size="1">Evapotranspiraición</font></b></p>
+              </td>
+              <td width="1%" rowspan="1"> </td>
+              <td width="22%" valign="top" align="center"><b><img border="0"
+                src="DewPoint.gif" alt="Punto de Rocío (°C)"></b> 
+
+                <p class="piefoto"><b><font size="1">Punto de Rocío
+                Actual</font></b></p>
+              </td>
+              <td width="2%" valign="top" align="center"> </td>
+              <td width="2%" valign="top" align="center"> </td>
+              <td width="25%" valign="top" align="center"><b><img border="0"
+                src="DewPointHistory.gif" alt="Punto de Rocío (°C)"></b> 
+
+                <p class="piefoto"><b><font size="1">Punto de rocío ultimas 24
+                Hs</font></b></p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+
+        <table border="0" cellpadding="0" cellspacing="0"
+        style="border-collapse: collapse" width="100%">
+          <tbody>
+            <tr>
+              <td width="50%" valign="top"><p class="titeea"
+                align="center"><b>Viento</b></p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="40%" class="txttabla" height="9"
+                      bgcolor="#EDEDED">Velocidad:</td>
+                      <td width="60%" class="txttabla" height="9"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--windSpeed--> <!--windUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Del Sector:</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--windDirection--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"> </td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center" bgcolor="#EDEDED"><b>Máximas</b></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED"><b>Diaria</b></td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--HiwindSpeed--> <!--windUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED">Mensual</td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                        bgcolor="#EDEDED"> <!--hiMonthlyWindSpeed--> <!--windUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="40%" class="txttabla" height="13"
+                      bgcolor="#EDEDED">Anual</td>
+                      <td width="60%" class="txttabla" height="13"
+                      align="center"
+                        bgcolor="#EDEDED"> <!--hiYearlyWindSpeed--> <!--windUnit--></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p> </p>
+              </td>
+              <td width="24%" align="center" valign="top"><p><b><font
+                face="verdana, Arial, Helvetica"><img src="WindDirection.gif"
+                alt="Dirección del viento"></font></b> </p>
+
+                <p class="piefoto"><b><font size="1">Dirección
+                Viento</font></b></p>
+              </td>
+              <td width="26%" align="center" valign="top"><b><font
+                face="verdana, Arial, Helvetica"><img
+                src="10MinAvgWindSpeed.gif"
+                alt="Velocidad del viento"></font></b> 
+
+                <p class="piefoto"><b><font size="1">Velocidad Media últimos 10
+                minutos</font></b></p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+
+        <table border="0" cellpadding="0" cellspacing="0"
+        style="border-collapse: collapse" width="100%">
+          <tbody>
+            <tr>
+              <td width="50%" valign="top" height="84"><p class="titeea"
+                align="center"><b>Presión Barométrica</b></p>
+
+                <table border="1" cellpadding="0" cellspacing="0"
+                style="border-collapse: collapse" width="100%">
+                  <tbody>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEDED" align="left"><b>Presión Barométrica
+                        Actual</b></td>
+                      <td width="51%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"
+                        colspan="2"> <!--barometer--> <!--barUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEDED" align="left"><b>Tendencia Barométrica
+                        Actual</b></td>
+                      <td width="51%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"
+                        colspan="2"> <!--barTrend--> (*)</td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEDED" align="left"> </td>
+                      <td width="25%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"><b>Mínimos</b></td>
+                      <td width="26%" class="txttabla" height="12"
+                      align="center" bgcolor="#EDEDED"><b>Máximos</b></td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEDED" align="left"><b>Diaria  </b></td>
+                      <td width="26%" class="txttabla" height="12"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--lowBarometer--> <!--barUnit--></td>
+                      <td width="25%" class="txttabla" height="12"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--hiBarometer--> <!--barUnit--></td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="12"
+                      bgcolor="#EDEDED" align="left"><b>a Hs:</b></td>
+                      <td width="26%" class="txttabla" height="12"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--lowBarometerTime--></td>
+                      <td width="25%" class="txttabla" height="12"
+                      align="center"
+                      bgcolor="#EDEDED"> <!--hiBarometerTime--></td>
+                    </tr>
+                    <tr>
+                      <td width="49%" class="txttabla" height="13"
+                      bgcolor="#EDEDED" align="left"><b>Mensual </b></td>
+                      <td width="26%" class="txttabla" height="13"
+                      align="center"
+                        bgcolor="#EDEDED"> <!--lowMonthlyBarometer--> <!--barUnit--></td>
+                      <td width="25%" class="txttabla" height="13"
+                      align="center"
+                        bgcolor="#EDEDED"> <!--hiMonthlyBarometer--> <!--barUnit--></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p class="piefoto"><font size="2"><b>(*) </b>Tendencia
+                barométrica: Sentido del cambio en la presión barométrica en
+                las últimas 3 horas. </font></p>
+
+                <p class="piefoto"><font size="2">Rising rapidly: incremento
+                rápido </font></p>
+
+                <p class="piefoto"><font size="2">Rising slowly: incremento
+                moderado </font></p>
+
+                <p class="piefoto"><font size="2">Steady:  estable </font></p>
+
+                <p class="piefoto"><font size="2">Falling Slowly : disminución
+                lenta</font></p>
+
+                <p class="piefoto"><font size="2">Falling rapidly: disminución
+                rápida</font></p>
+              </td>
+              <td width="50%" valign="top" height="84"><p
+                align="center"><b><img border="0" src="BarometerHistory.gif"
+                alt="Tendencia presión barométrica (hPa) "></b></p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <hr>
+
+       
+
+        <p align="center"><b>Este servicio de datos online  puede interrumpirse
+        por causas externas como: </b> </p>
+
+        <p align="center"><b>cortes de energía prolongados o caídas del enlace
+        a Internet.</b></p>
+        <hr>
+      </td>
+    </tr>
+    
+	<tr>
+      
+	  <td width="200" height="31" colspan="2"><p> </p>
+
+        <p align="center"><span lang="es">
+			<a target="_blank" href="https://www.argentina.gob.ar/economia">
+		<img border="0" src="https://ema.inta.gob.ar/eeasalta_cerrillos/logo_magyp.svg" "></a>      </span> 
+		<span lang="es">      </span></p>
+      </td>
+	  
+    </tr>
+	
+	
+  </tbody>
+</table>
+</center>
+</div>
+
+<p> </p>
+</body>
+</html>
