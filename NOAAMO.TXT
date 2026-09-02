@@ -1,0 +1,51 @@
+                   MONTHLY CLIMATOLOGICAL SUMMARY for SEP. 2026
+
+NAME: Prueba   CITY:    STATE:  
+ELEV:     0 m  LAT:  25° 18' 00" S  LONG:  66° 48' 00" W
+
+                   TEMPERATURE (°C), RAIN  (mm), WIND SPEED (km/hr)
+
+                                      HEAT  COOL        AVG
+    MEAN                              DEG   DEG         WIND                 DOM
+DAY TEMP  HIGH   TIME   LOW    TIME   DAYS  DAYS  RAIN  SPEED HIGH   TIME    DIR
+------------------------------------------------------------------------------------
+ 1
+ 2  21.4  22.3   10:53  20.0    9:15   0.0   0.2   0.0   0.0   0.0     ---   ---
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+-------------------------------------------------------------------------------------
+    21.4  22.3     2    20.0     2     0.0   0.2   0.0   0.0   0.0     ---   ---
+
+Max >=  32.0:  0
+Max <=   0.0:  0
+Min <=   0.0:  0
+Min <= -18.0:  0
+Max Rain: 0.00 ON 01/09/26
+Days of Rain: 0 (> .2 mm) 0 (> 2 mm) 0 (> 20 mm)
+Heat Base:  18.3  Cool Base:  18.3  Method: Integration
