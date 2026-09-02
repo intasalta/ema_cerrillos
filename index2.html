@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="ISO-8859-1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estación Meteorológica Automática INTA Cerrillos</title>
   
@@ -112,7 +112,7 @@
         <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">Última actualización</span>
         <h2 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2 mt-0.5">
           <i data-feather="clock" class="text-sky-500 h-5 w-5"></i>
-          02/09/26 - 11:39
+          <!--StationDate--> - <!--StationTime-->
         </h2>
       </div>
       
@@ -121,7 +121,7 @@
           <i data-feather="sunrise" class="h-5 w-5 text-amber-500"></i>
           <div>
             <p class="text-[10px] uppercase font-bold text-slate-400">Salida Sol</p>
-            <p class="font-semibold text-slate-700 dark:text-slate-200"> 7:38 hs</p>
+            <p class="font-semibold text-slate-700 dark:text-slate-200"><!--sunriseTime--> hs</p>
           </div>
         </div>
         
@@ -131,7 +131,7 @@
           <i data-feather="sunset" class="h-5 w-5 text-orange-500"></i>
           <div>
             <p class="text-[10px] uppercase font-bold text-slate-400">Puesta Sol</p>
-            <p class="font-semibold text-slate-700 dark:text-slate-200">19:16 hs</p>
+            <p class="font-semibold text-slate-700 dark:text-slate-200"><!--sunsetTime--> hs</p>
           </div>
         </div>
       </div>
@@ -147,7 +147,7 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
               <i data-feather="thermometer" class="h-5 w-5 text-red-500"></i> Temperatura
             </h3>
-            <span class="text-3xl font-extrabold text-slate-900 dark:text-white">22.3<span class="text-lg font-medium text-slate-400">°C</span></span>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white"><!--outsideTemp--><span class="text-lg font-medium text-slate-400"><!--tempUnit--></span></span>
           </div>
 
           <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
@@ -161,29 +161,29 @@
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
               <tr>
                 <td class="py-2 font-medium">Diaria</td>
-                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">19.9°C</td>
-                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold">22.3°C</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold"><!--lowOutsideTemp--><!--tempUnit--></td>
+                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold"><!--hiOutsideTemp--><!--tempUnit--></td>
               </tr>
               <tr class="text-[10px] text-slate-400">
                 <td class="py-1">A hs:</td>
-                <td class="py-1 text-center">11:22</td>
-                <td class="py-1 text-center">11:08</td>
+                <td class="py-1 text-center"><!--lowOutsideTempTime--></td>
+                <td class="py-1 text-center"><!--hiOutsideTempTime--></td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Mensual</td>
-                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">14.4°C</td>
-                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold">25.0°C</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold"><!--lowMonthlyOutsideTemp--><!--tempUnit--></td>
+                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold"><!--hiMonthlyOutsideTemp--><!--tempUnit--></td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Anual</td>
-                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">14.4</td>
-                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold">25.0</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold"><!--lowYearlyOutsideTemp--></td>
+                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold"><!--hiYearlyOutsideTemp--></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
-          <img src="OutsideTempHistory.gif" alt="Gráfico Temperatura 24h" class="mx-auto max-h-52 w-full object-contain rounded-lg shadow-sm dark:bg-white dark:p-1">
+          <img src="OutsideTempHistory.gif" alt="Gráfico Temperatura 24h" class="mx-auto max-h-36 rounded-lg shadow-sm dark:bg-white dark:p-1">
           <p class="text-[11px] text-slate-400 mt-2">Temperatura últimas 24 hs</p>
         </div>
       </div>
@@ -195,7 +195,7 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
               <i data-feather="droplet" class="h-5 w-5 text-blue-500"></i> Humedad
             </h3>
-            <span class="text-3xl font-extrabold text-slate-900 dark:text-white">55<span class="text-lg font-medium text-slate-400">% </span></span>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white"><!--outsideHumidity--><span class="text-lg font-medium text-slate-400"><!--humUnit--></span></span>
           </div>
 
           <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
@@ -209,29 +209,29 @@
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
               <tr>
                 <td class="py-2 font-medium">Diaria</td>
-                <td class="py-2 text-center font-semibold">55% </td>
-                <td class="py-2 text-center font-semibold">62% </td>
+                <td class="py-2 text-center font-semibold"><!--lowHumidity--><!--humUnit--></td>
+                <td class="py-2 text-center font-semibold"><!--hiHumidity--><!--humUnit--></td>
               </tr>
               <tr class="text-[10px] text-slate-400">
                 <td class="py-1">A hs:</td>
-                <td class="py-1 text-center">10:32</td>
-                <td class="py-1 text-center"> 9:55</td>
+                <td class="py-1 text-center"><!--lowHumTime--></td>
+                <td class="py-1 text-center"><!--hiHumTime--></td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Mensual</td>
-                <td class="py-2 text-center font-semibold">44% </td>
-                <td class="py-2 text-center font-semibold">73% </td>
+                <td class="py-2 text-center font-semibold"><!--lowMonthlyHumidity--><!--humUnit--></td>
+                <td class="py-2 text-center font-semibold"><!--hiMonthlyHumidity--><!--humUnit--></td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Anual</td>
-                <td class="py-2 text-center font-semibold">44% </td>
-                <td class="py-2 text-center font-semibold">73% </td>
+                <td class="py-2 text-center font-semibold"><!--lowYearlyHumidity--><!--humUnit--></td>
+                <td class="py-2 text-center font-semibold"><!--hiYearlyHumidity--><!--humUnit--></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
-          <img src="OutsideHumidityHistory.gif" alt="Gráfico Humedad 24h" class="mx-auto max-h-52 w-full object-contain rounded-lg shadow-sm dark:bg-white dark:p-1">
+          <img src="OutsideHumidityHistory.gif" alt="Gráfico Humedad 24h" class="mx-auto max-h-36 rounded-lg shadow-sm dark:bg-white dark:p-1">
           <p class="text-[11px] text-slate-400 mt-2">Humedad últimas 24 hs</p>
         </div>
       </div>
@@ -248,7 +248,7 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Sensación por Viento</p>
               <p class="text-[10px] text-slate-400">Wind Chill</p>
             </div>
-            <span class="text-xl font-bold text-slate-800 dark:text-white">22.3°C</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-white"><!--windChill--><!--tempUnit--></span>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
@@ -256,20 +256,20 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Índice de Calor</p>
               <p class="text-[10px] text-slate-400">Temp + Humedad</p>
             </div>
-            <span class="text-xl font-bold text-slate-800 dark:text-white">22.0°C</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-white"><!--outsideHeatIndex--><!--tempUnit--></span>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
             <div>
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Punto de Rocío Actual</p>
             </div>
-            <span class="text-lg font-bold text-slate-800 dark:text-white">12.8°C</span>
+            <span class="text-lg font-bold text-slate-800 dark:text-white"><!--outsideDewPt--><!--tempUnit--></span>
           </div>
         </div>
 
-        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center flex justify-center items-center gap-2">
-          <img src="WindChill.gif" alt="Gráfico WindChill" class="max-h-36 w-1/2 object-contain rounded shadow-sm dark:bg-white dark:p-1">
-          <img src="HeatIndex.gif" alt="Gráfico HeatIndex" class="max-h-36 w-1/2 object-contain rounded shadow-sm dark:bg-white dark:p-1">
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center flex justify-center gap-2">
+          <img src="WindChill.gif" alt="Gráfico WindChill" class="max-h-24 rounded shadow-sm dark:bg-white dark:p-1">
+          <img src="HeatIndex.gif" alt="Gráfico HeatIndex" class="max-h-24 rounded shadow-sm dark:bg-white dark:p-1">
         </div>
       </div>
 
@@ -287,27 +287,27 @@
         <div class="grid grid-cols-2 gap-3 text-sm">
           <div class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 p-3 rounded-xl">
             <p class="text-xs text-blue-600 dark:text-blue-400 font-medium">Lluvia del Día</p>
-            <p class="text-xl font-bold text-blue-950 dark:text-blue-200">0.0 mm</p>
+            <p class="text-xl font-bold text-blue-950 dark:text-blue-200"><!--dailyRain--> <!--rainUnit--></p>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Intensidad Actual</p>
-            <p class="text-xl font-bold text-slate-800 dark:text-white">0.0 mm/hr</p>
+            <p class="text-xl font-bold text-slate-800 dark:text-white"><!--rainRate--> <!--rateUnit--></p>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Tormenta</p>
-            <p class="text-lg font-bold text-slate-800 dark:text-white">0.0 mm</p>
+            <p class="text-lg font-bold text-slate-800 dark:text-white"><!--stormRain--> <!--rainUnit--></p>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Lluvia Mensual</p>
-            <p class="text-lg font-bold text-slate-800 dark:text-white">1.6 mm</p>
+            <p class="text-lg font-bold text-slate-800 dark:text-white"><!--monthlyRain--> <!--rainUnit--></p>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 col-span-2">
             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Acumulado Anual</p>
-            <p class="text-xl font-bold text-slate-900 dark:text-white">1.6 mm</p>
+            <p class="text-xl font-bold text-slate-900 dark:text-white"><!--totalRain--> <!--rainUnit--></p>
           </div>
         </div>
       </div>
@@ -322,22 +322,22 @@
           <div class="grid grid-cols-2 gap-3 text-sm mb-4">
             <div class="bg-amber-50/70 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-100 dark:border-amber-900/40">
               <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">ET Diaria</p>
-              <p class="text-xl font-bold text-amber-950 dark:text-amber-200">0.08 mm</p>
+              <p class="text-xl font-bold text-amber-950 dark:text-amber-200"><!--dailyEt--> <!--rainUnit--></p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">ET Mensual</p>
-              <p class="text-xl font-bold text-slate-800 dark:text-white">2.62 mm</p>
+              <p class="text-xl font-bold text-slate-800 dark:text-white"><!--monthlyEt--> <!--rainUnit--></p>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-around items-center pt-2 border-t border-slate-100 dark:border-slate-700/50 gap-2">
-          <div class="text-center w-1/2">
-            <img src="ETHistory.gif" alt="Gráfico ET" class="max-h-36 w-full object-contain rounded-lg shadow-sm mx-auto dark:bg-white dark:p-1">
+        <div class="flex justify-around items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
+          <div class="text-center">
+            <img src="ETHistory.gif" alt="Gráfico ET" class="max-h-24 rounded-lg shadow-sm mx-auto dark:bg-white dark:p-1">
             <p class="text-[10px] text-slate-400 mt-1">Evapotranspiración</p>
           </div>
-          <div class="text-center w-1/2">
-            <img src="DewPointHistory.gif" alt="Gráfico Punto Rocío" class="max-h-36 w-full object-contain rounded-lg shadow-sm mx-auto dark:bg-white dark:p-1">
+          <div class="text-center">
+            <img src="DewPointHistory.gif" alt="Gráfico Punto Rocío" class="max-h-24 rounded-lg shadow-sm mx-auto dark:bg-white dark:p-1">
             <p class="text-[10px] text-slate-400 mt-1">Punto de Rocío 24h</p>
           </div>
         </div>
@@ -357,11 +357,11 @@
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
             <p class="text-xs text-slate-400 font-medium">Velocidad Actual</p>
-            <p class="text-2xl font-bold text-slate-800 dark:text-white">0.0 <span class="text-xs font-normal text-slate-400">km/hr</span></p>
+            <p class="text-2xl font-bold text-slate-800 dark:text-white"><!--windSpeed--> <span class="text-xs font-normal text-slate-400"><!--windUnit--></span></p>
           </div>
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
             <p class="text-xs text-slate-400 font-medium">Dirección Sector</p>
-            <p class="text-2xl font-bold text-sky-600 dark:text-sky-400">---</p>
+            <p class="text-2xl font-bold text-sky-600 dark:text-sky-400"><!--windDirection--></p>
           </div>
         </div>
 
@@ -370,22 +370,22 @@
           <div class="grid grid-cols-3 gap-2 text-center text-xs">
             <div class="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
               <span class="block text-slate-400 text-[10px]">Diaria</span>
-              <span class="font-bold text-slate-700 dark:text-slate-200">0.0 km/hr</span>
+              <span class="font-bold text-slate-700 dark:text-slate-200"><!--HiwindSpeed--> <!--windUnit--></span>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
               <span class="block text-slate-400 text-[10px]">Mensual</span>
-              <span class="font-bold text-slate-700 dark:text-slate-200">11.3 km/hr</span>
+              <span class="font-bold text-slate-700 dark:text-slate-200"><!--hiMonthlyWindSpeed--> <!--windUnit--></span>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
               <span class="block text-slate-400 text-[10px]">Anual</span>
-              <span class="font-bold text-slate-700 dark:text-slate-200">11.3 km/hr</span>
+              <span class="font-bold text-slate-700 dark:text-slate-200"><!--hiYearlyWindSpeed--> <!--windUnit--></span>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-around items-center mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/50 gap-2">
-          <img src="WindDirection.gif" alt="Dirección Viento" class="max-h-36 w-1/2 object-contain dark:bg-white dark:p-1 dark:rounded-lg">
-          <img src="10MinAvgWindSpeed.gif" alt="Velocidad Media 10 min" class="max-h-36 w-1/2 object-contain dark:bg-white dark:p-1 dark:rounded-lg">
+        <div class="flex justify-around items-center mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+          <img src="WindDirection.gif" alt="Dirección Viento" class="max-h-24 dark:bg-white dark:p-1 dark:rounded-lg">
+          <img src="10MinAvgWindSpeed.gif" alt="Velocidad Media 10 min" class="max-h-24 dark:bg-white dark:p-1 dark:rounded-lg">
         </div>
       </div>
 
@@ -399,11 +399,11 @@
           <div class="grid grid-cols-2 gap-3 text-sm mb-4">
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Presión Actual</p>
-              <p class="text-xl font-bold text-slate-900 dark:text-white">878.3 hPa</p>
+              <p class="text-xl font-bold text-slate-900 dark:text-white"><!--barometer--> <!--barUnit--></p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Tendencia (3 hs)</p>
-              <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-1">Falling Slowly</p>
+              <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-1"><!--barTrend--></p>
             </div>
           </div>
 
@@ -418,25 +418,25 @@
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
               <tr>
                 <td class="py-2 font-medium">Diaria</td>
-                <td class="py-2 text-center font-semibold">840.2 hPa</td>
-                <td class="py-2 text-center font-semibold">888.1 hPa</td>
+                <td class="py-2 text-center font-semibold"><!--lowBarometer--> <!--barUnit--></td>
+                <td class="py-2 text-center font-semibold"><!--hiBarometer--> <!--barUnit--></td>
               </tr>
               <tr class="text-[10px] text-slate-400">
                 <td class="py-1">A hs:</td>
-                <td class="py-1 text-center">11:23</td>
-                <td class="py-1 text-center">11:18</td>
+                <td class="py-1 text-center"><!--lowBarometerTime--></td>
+                <td class="py-1 text-center"><!--hiBarometerTime--></td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Mensual</td>
-                <td class="py-2 text-center font-semibold">840.2 hPa</td>
-                <td class="py-2 text-center font-semibold">888.1 hPa</td>
+                <td class="py-2 text-center font-semibold"><!--lowMonthlyBarometer--> <!--barUnit--></td>
+                <td class="py-2 text-center font-semibold"><!--hiMonthlyBarometer--> <!--barUnit--></td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="text-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
-          <img src="BarometerHistory.gif" alt="Histórico Barómetro" class="mx-auto max-h-40 w-full object-contain rounded-lg shadow-sm dark:bg-white dark:p-1">
+          <img src="BarometerHistory.gif" alt="Histórico Barómetro" class="mx-auto max-h-28 rounded-lg shadow-sm dark:bg-white dark:p-1">
         </div>
       </div>
 
