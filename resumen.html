@@ -90,11 +90,11 @@
   <!-- CONTENIDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
     
-    <!-- TITULO DASHBOARD -->
+    <!-- TITULO DASHBOARD DINAMICO -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h2 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-          <i data-feather="activity" class="text-sky-500"></i> Histórico y Tendencias NOAA
+          <i data-feather="activity" class="text-sky-500"></i> <span id="dashboard-title">Tendencias Mensuales</span>
         </h2>
         <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
           Procesamiento dinámico del reporte meteorológico mensual.
@@ -220,74 +220,87 @@
     let chartLluviaInstance = null;
     let chartAnualInstance = null;
 
+    const mesesMap = {
+      'JAN': 'Enero', 'FEB': 'Febrero', 'MAR': 'Marzo', 'APR': 'Abril',
+      'MAY': 'Mayo', 'JUN': 'Junio', 'JUL': 'Julio', 'AUG': 'Agosto',
+      'SEP': 'Septiembre', 'OCT': 'Octubre', 'NOV': 'Noviembre', 'DEC': 'Diciembre'
+    };
+
     function parseNOAAMensual(text) {
-	  const lines = text.split('\n');
-	  const startIdx = lines.findIndex(l => l.includes('------------------------------------------------------------------------------------'));
-	  
-	  const dias = [], tempMax = [], tempMin = [], rain = [];
-	  let maxTemp = -99, maxTempDay = '--', maxTempTime = '--';
-	  let minTemp = 99, minTempDay = '--', minTempTime = '--';
-	  let maxRain = 0, maxRainDay = '--';
+      const lines = text.split('\n');
 
-	  if (startIdx !== -1) {
-		for (let i = startIdx + 1; i < lines.length; i++) {
-		  const line = lines[i];
-		  if (line.includes('-------------------------------------------------------------------------------------')) break;
-		  if (!line.trim()) continue;
+      // Extraer Mes y Año del Encabezado
+      if (lines.length > 0) {
+        const headerMatch = lines[0].match(/for\s+([A-Z]{3})\.\s+(\d{4})/i);
+        if (headerMatch) {
+          const mesCod = headerMatch[1].toUpperCase();
+          const anio = headerMatch[2];
+          const mesNombre = mesesMap[mesCod] || mesCod;
+          document.getElementById('dashboard-title').innerText = `Tendencias Mensuales - ${mesNombre} ${anio}`;
+        }
+      }
 
-		  // Dividir la línea por espacios
-		  const parts = line.trim().split(/\s+/);
+      const startIdx = lines.findIndex(l => l.includes('------------------------------------------------------------------------------------'));
+      
+      const dias = [], tempMax = [], tempMin = [], rain = [];
+      let maxTemp = -99, maxTempDay = '--', maxTempTime = '--';
+      let minTemp = 99, minTempDay = '--', minTempTime = '--';
+      let maxRain = 0, maxRainDay = '--';
 
-		  // Verificar que sea una fila válida con datos (mínimo 9 columnas: DAY, TEMP, HIGH, TIME, LOW, TIME, HEAT, COOL, RAIN)
-		  if (parts.length >= 9 && !isNaN(parts[0])) {
-			const day = parts[0];
-			const max = parseFloat(parts[2]);
-			const maxTime = parts[3];
-			const min = parseFloat(parts[4]);
-			const minTime = parts[5];
-			const precip = parseFloat(parts[8]); // Columna RAIN (posición 8)
+      if (startIdx !== -1) {
+        for (let i = startIdx + 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.includes('-------------------------------------------------------------------------------------')) break;
+          if (!line.trim()) continue;
 
-			dias.push(`Día ${day}`);
-			tempMax.push(max);
-			tempMin.push(min);
+          const parts = line.trim().split(/\s+/);
 
-			// Extremos de temperatura
-			if (max > maxTemp) {
-			  maxTemp = max;
-			  maxTempDay = day;
-			  maxTempTime = maxTime || '--';
-			}
+          if (parts.length >= 9 && !isNaN(parts[0])) {
+            const day = parts[0];
+            const max = parseFloat(parts[2]);
+            const maxTime = parts[3];
+            const min = parseFloat(parts[4]);
+            const minTime = parts[5];
+            const precip = parseFloat(parts[8]);
 
-			if (min < minTemp) {
-			  minTemp = min;
-			  minTempDay = day;
-			  minTempTime = minTime || '--';
-			}
+            dias.push(`Día ${day}`);
+            tempMax.push(max);
+            tempMin.push(min);
 
-			// Precipitación
-			const currentRain = isNaN(precip) ? 0 : precip;
-			rain.push(currentRain);
+            if (max > maxTemp) {
+              maxTemp = max;
+              maxTempDay = day;
+              maxTempTime = maxTime || '--';
+            }
 
-			if (currentRain > maxRain) {
-			  maxRain = currentRain;
-			  maxRainDay = day;
-			}
-		  }
-		}
-	  }
+            if (min < minTemp) {
+              minTemp = min;
+              minTempDay = day;
+              minTempTime = minTime || '--';
+            }
 
-	  // Actualizar UI
-	  document.getElementById('kpi-tmax').innerText = maxTemp !== -99 ? `${maxTemp.toFixed(1)} °C` : '-- °C';
-	  document.getElementById('kpi-tmax-date').innerText = `Día: ${maxTempDay} | Hora: ${maxTempTime}`;
+            const currentRain = isNaN(precip) ? 0 : precip;
+            rain.push(currentRain);
 
-	  document.getElementById('kpi-tmin').innerText = minTemp !== 99 ? `${minTemp.toFixed(1)} °C` : '-- °C';
-	  document.getElementById('kpi-tmin-date').innerText = `Día: ${minTempDay} | Hora: ${minTempTime}`;
+            if (currentRain > maxRain) {
+              maxRain = currentRain;
+              maxRainDay = day;
+            }
+          }
+        }
+      }
 
-	  document.getElementById('kpi-rain').innerText = `${maxRain.toFixed(1)} mm`;
-	  document.getElementById('kpi-rain-date').innerText = maxRain > 0 ? `Día: ${maxRainDay}` : 'Sin lluvia en el mes';
+      document.getElementById('kpi-tmax').innerText = maxTemp !== -99 ? `${maxTemp.toFixed(1)} °C` : '-- °C';
+      document.getElementById('kpi-tmax-date').innerText = `Día: ${maxTempDay} | Hora: ${maxTempTime}`;
 
-	  return { dias, tempMax, tempMin, rain };
-	}
+      document.getElementById('kpi-tmin').innerText = minTemp !== 99 ? `${minTemp.toFixed(1)} °C` : '-- °C';
+      document.getElementById('kpi-tmin-date').innerText = `Día: ${minTempDay} | Hora: ${minTempTime}`;
+
+      document.getElementById('kpi-rain').innerText = `${maxRain.toFixed(1)} mm`;
+      document.getElementById('kpi-rain-date').innerText = maxRain > 0 ? `Día: ${maxRainDay}` : 'Sin lluvia en el mes';
+
+      return { dias, tempMax, tempMin, rain };
+    }
 
     function parseNOAAAnual(text) {
       const lines = text.split('\n');
