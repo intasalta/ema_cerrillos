@@ -2,10 +2,11 @@ import os
 import re
 import sqlite3
 
-TXT_FILE = "download.txt"  # Reemplaza por el nombre/ruta real de tu archivo de datos
+# Nombre exacto de tu archivo plano en la raíz del repositorio
+TXT_FILE = "downld02.txt"
 DB_FILE = "estacion.db"
 
-# Columnas esperadas en orden
+# Lista de columnas esperadas
 COLUMNS = [
     "date",
     "time",
@@ -65,10 +66,10 @@ def clean_value(val):
 
 def parse_and_insert(conn):
     if not os.path.exists(TXT_FILE):
-        print(f"El archivo {TXT_FILE} no existe.")
+        print(f"ERROR: El archivo {TXT_FILE} no existe en la ruta actual.")
         return
 
-    with open(TXT_FILE, "r", encoding="utf-8") as f:
+    with open(TXT_FILE, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
 
     cursor = conn.cursor()
@@ -76,17 +77,26 @@ def parse_and_insert(conn):
 
     for line in lines:
         line_str = line.strip()
-        # Ignorar encabezados y líneas separadoras
-        if not line_str or line_str.startswith("-") or "Date" in line_str:
+
+        # Ignorar líneas vacías, divisores de guiones o encabezados
+        if (
+            not line_str
+            or line_str.startswith("---")
+            or line_str.startswith("Date")
+            or "Temp" in line_str
+        ):
             continue
 
+        # Separa por cualquier cantidad de espacios o tabulaciones
         parts = re.split(r"\s+", line_str)
 
-        # Verificar que la línea parezca una fila válida de datos
-        if len(parts) >= len(COLUMNS):
+        # Si la línea tiene al menos fecha y hora
+        if len(parts) >= 2:
+            # Rellenar con None si la línea tiene menos columnas de las esperadas
             row_data = [clean_value(p) for p in parts[: len(COLUMNS)]]
+            if len(row_data) < len(COLUMNS):
+                row_data.extend([None] * (len(COLUMNS) - len(row_data)))
 
-            # Insertar ignorando duplicados si la combinación (date, time) ya existe
             placeholders = ", ".join(["?"] * len(COLUMNS))
             col_names = ", ".join(COLUMNS)
             query = f"INSERT OR IGNORE INTO mediciones ({col_names}) VALUES ({placeholders})"
@@ -96,7 +106,9 @@ def parse_and_insert(conn):
                 records_inserted += 1
 
     conn.commit()
-    print(f"Proceso finalizado. Registros nuevos insertados: {records_inserted}")
+    print(
+        f"Proceso completado con éxito. Registros nuevos insertados: {records_inserted}"
+    )
 
 
 if __name__ == "__main__":
