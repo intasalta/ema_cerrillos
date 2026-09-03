@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estación Meteorológica Cerrillos</title>
-    <!-- Chart.js CDN -->
+    <title>Estación Meteorológica Cerrillos - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -16,7 +15,7 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .header h1 {
             margin: 0;
@@ -26,45 +25,76 @@
             color: #7f8c8d;
             font-size: 0.9em;
         }
+
+        /* PANEL DE CONTROLES */
+        .controls-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .control-group label {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #555;
+        }
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.9em;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        /* TARJETAS DE VALORES ACTUALES */
         .cards-container {
             display: flex;
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .card {
             background: white;
-            padding: 20px;
+            padding: 15px 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            min-width: 160px;
+            min-width: 140px;
             text-align: center;
         }
         .card h3 {
             margin: 0;
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #7f8c8d;
             text-transform: uppercase;
         }
         .card .value {
-            font-size: 1.8em;
+            font-size: 1.6em;
             font-weight: bold;
             color: #2c3e50;
-            margin: 10px 0 0 0;
+            margin-top: 5px;
         }
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+
+        /* CONTENEDOR DEL GRÁFICO */
         .chart-card {
             background: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 1100px;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -75,88 +105,154 @@
         <p id="last-update">Cargando información...</p>
     </div>
 
-    <!-- TARJETAS DE VALORES ACTUALES -->
+    <!-- TARJETAS CON VALORES ACTUALES -->
     <div class="cards-container">
-        <div class="card">
-            <h3>Temperatura</h3>
-            <div class="value" id="curr-temp">-- °C</div>
+        <div class="card"><h3>Temperatura</h3><div class="value" id="curr-temp">-- °C</div></div>
+        <div class="card"><h3>Humedad</h3><div class="value" id="curr-hum">-- %</div></div>
+        <div class="card"><h3>Viento</h3><div class="value" id="curr-wind">-- km/h</div></div>
+        <div class="card"><h3>Presión</h3><div class="value" id="curr-bar">-- hPa</div></div>
+        <div class="card"><h3>Lluvia</h3><div class="value" id="curr-rain">-- mm</div></div>
+    </div>
+
+    <!-- PANEL DE FILTROS Y CONTROLES -->
+    <div class="controls-card">
+        <div class="control-group">
+            <label for="timeRange">Rango de Tiempo:</label>
+            <select id="timeRange">
+                <option value="24h">Últimas 24 horas</option>
+                <option value="48h">Últimas 48 horas</option>
+                <option value="7d">Últimos 7 días</option>
+                <option value="all">Todo el historial</option>
+            </select>
         </div>
-        <div class="card">
-            <h3>Humedad</h3>
-            <div class="value" id="curr-hum">-- %</div>
-        </div>
-        <div class="card">
-            <h3>Viento</h3>
-            <div class="value" id="curr-wind">-- km/h</div>
-        </div>
-        <div class="card">
-            <h3>Presión</h3>
-            <div class="value" id="curr-bar">-- hPa</div>
+
+        <div class="control-group">
+            <label for="variableSelect">Variable a Consultar:</label>
+            <select id="variableSelect">
+                <option value="temp_out">Temperatura Aire (°C)</option>
+                <option value="hi_temp">Temperatura Máxima (°C)</option>
+                <option value="low_temp">Temperatura Mínima (°C)</option>
+                <option value="out_hum">Humedad Relativa (%)</option>
+                <option value="dew_pt">Punto de Rocío (°C)</option>
+                <option value="wind_speed">Velocidad del Viento (km/h)</option>
+                <option value="hi_speed">Ráfaga Máxima (km/h)</option>
+                <option value="wind_chill">Sensación Térmica por Viento (°C)</option>
+                <option value="heat_index">Índice de Calor (°C)</option>
+                <option value="thw_index">Índice THW (°C)</option>
+                <option value="thsw_index">Índice THSW (°C)</option>
+                <option value="bar">Presión Barométrica (hPa)</option>
+                <option value="rain">Precipitación (mm)</option>
+                <option value="rain_rate">Intensidad de Lluvia (mm/h)</option>
+                <option value="solar_rad">Radiación Solar (W/m²)</option>
+                <option value="solar_energy">Energía Solar</option>
+                <option value="in_temp">Temperatura Interna (°C)</option>
+                <option value="in_hum">Humedad Interna (%)</option>
+            </select>
         </div>
     </div>
 
-    <!-- GRÁFICOS INTERACTIVOS -->
-    <div class="charts-grid">
-        <div class="chart-card">
-            <canvas id="tempChart"></canvas>
-        </div>
-        <div class="chart-card">
-            <canvas id="humChart"></canvas>
-        </div>
+    <!-- GRÁFICO PRINCIPAL -->
+    <div class="chart-card">
+        <canvas id="mainChart" height="110"></canvas>
     </div>
 
     <script>
+        let rawData = [];
+        let chartInstance = null;
+
+        const variableConfigs = {
+            'temp_out':     { label: 'Temperatura Aire (°C)', color: '#e74c3c', bg: 'rgba(231, 76, 60, 0.1)' },
+            'hi_temp':      { label: 'Temperatura Máxima (°C)', color: '#c0392b', bg: 'rgba(192, 57, 43, 0.1)' },
+            'low_temp':     { label: 'Temperatura Mínima (°C)', color: '#2980b9', bg: 'rgba(41, 128, 185, 0.1)' },
+            'out_hum':      { label: 'Humedad Relativa (%)', color: '#3498db', bg: 'rgba(52, 152, 219, 0.1)' },
+            'dew_pt':       { label: 'Punto de Rocío (°C)', color: '#16a085', bg: 'rgba(22, 160, 133, 0.1)' },
+            'wind_speed':   { label: 'Velocidad Viento (km/h)', color: '#2ecc71', bg: 'rgba(46, 204, 113, 0.1)' },
+            'hi_speed':     { label: 'Ráfaga Máxima (km/h)', color: '#27ae60', bg: 'rgba(39, 174, 96, 0.1)' },
+            'wind_chill':   { label: 'Sensación Térmica (°C)', color: '#34495e', bg: 'rgba(52, 73, 94, 0.1)' },
+            'heat_index':   { label: 'Índice de Calor (°C)', color: '#d35400', bg: 'rgba(211, 84, 0, 0.1)' },
+            'thw_index':    { label: 'Índice THW (°C)', color: '#e67e22', bg: 'rgba(230, 126, 34, 0.1)' },
+            'thsw_index':   { label: 'Índice THSW (°C)', color: '#f39c12', bg: 'rgba(243, 156, 18, 0.1)' },
+            'bar':          { label: 'Presión Barométrica (hPa)', color: '#9b59b6', bg: 'rgba(155, 89, 182, 0.1)' },
+            'rain':         { label: 'Precipitación (mm)', color: '#1abc9c', bg: 'rgba(26, 188, 156, 0.3)', type: 'bar' },
+            'rain_rate':    { label: 'Intensidad de Lluvia (mm/h)', color: '#00a8ff', bg: 'rgba(0, 168, 255, 0.3)', type: 'bar' },
+            'solar_rad':    { label: 'Radiación Solar (W/m²)', color: '#f1c40f', bg: 'rgba(241, 196, 15, 0.2)' },
+            'solar_energy': { label: 'Energía Solar', color: '#f39c12', bg: 'rgba(243, 156, 18, 0.2)' },
+            'in_temp':      { label: 'Temp. Interna (°C)', color: '#7f8c8d', bg: 'rgba(127, 140, 141, 0.1)' },
+            'in_hum':       { label: 'Humedad Interna (%)', color: '#95a5a6', bg: 'rgba(149, 165, 166, 0.1)' }
+        };
+
         fetch('datos.json')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                if (!data || data.length === 0) return;
+                rawData = data;
+                if (!rawData || rawData.length === 0) return;
 
-                const lastRecord = data[data.length - 1];
-                document.getElementById('last-update').innerText = `Última actualización: ${lastRecord.date} ${lastRecord.time}`;
-                document.getElementById('curr-temp').innerText = `${lastRecord.temp_out ?? '--'} °C`;
-                document.getElementById('curr-hum').innerText = `${lastRecord.out_hum ?? '--'} %`;
-                document.getElementById('curr-wind').innerText = `${lastRecord.wind_speed ?? '--'} km/h`;
-                document.getElementById('curr-bar').innerText = `${lastRecord.bar ?? '--'} hPa`;
+                // Actualizar Tarjetas con el último registro
+                const last = rawData[rawData.length - 1];
+                document.getElementById('last-update').innerText = `Última actualización: ${last.date} ${last.time}`;
+                document.getElementById('curr-temp').innerText = `${last.temp_out ?? '--'} °C`;
+                document.getElementById('curr-hum').innerText = `${last.out_hum ?? '--'} %`;
+                document.getElementById('curr-wind').innerText = `${last.wind_speed ?? '--'} km/h`;
+                document.getElementById('curr-bar').innerText = `${last.bar ?? '--'} hPa`;
+                document.getElementById('curr-rain').innerText = `${last.rain ?? '0'} mm`;
 
-                const labels = data.map(d => `${d.date} ${d.time}`);
-                const temps = data.map(d => d.temp_out);
-                const hums = data.map(d => d.out_hum);
+                updateDashboard();
+            });
 
-                // Gráfico Temperatura
-                new Chart(document.getElementById('tempChart'), {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Temperatura (°C)',
-                            data: temps,
-                            borderColor: '#e74c3c',
-                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }]
+        function filterDataByRange(data, rangeKey) {
+            if (rangeKey === 'all') return data;
+            
+            // Estimación según cantidad de registros
+            let limit = data.length;
+            if (rangeKey === '24h') limit = 144;
+            else if (rangeKey === '48h') limit = 288;
+            else if (rangeKey === '7d') limit = 1008;
+
+            return data.slice(Math.max(data.length - limit, 0));
+        }
+
+        function updateDashboard() {
+            const range = document.getElementById('timeRange').value;
+            const selectedVar = document.getElementById('variableSelect').value;
+            const filteredData = filterDataByRange(rawData, range);
+
+            const labels = filteredData.map(d => `${d.date} ${d.time}`);
+            const values = filteredData.map(d => d[selectedVar]);
+            const config = variableConfigs[selectedVar] || { label: selectedVar, color: '#333', bg: 'rgba(0,0,0,0.1)' };
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: config.type || 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: config.label,
+                        data: values,
+                        borderColor: config.color,
+                        backgroundColor: config.bg,
+                        fill: true,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
                     },
-                    options: { responsive: true }
-                });
+                    scales: {
+                        x: { ticks: { maxTicksLimit: 12 } }
+                    }
+                }
+            });
+        }
 
-                // Gráfico Humedad
-                new Chart(document.getElementById('humChart'), {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Humedad (%)',
-                            data: hums,
-                            borderColor: '#3498db',
-                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-            })
-            .catch(err => console.error('Error al cargar datos:', err));
+        // Detectar cambios en los desplegables
+        document.getElementById('timeRange').addEventListener('change', updateDashboard);
+        document.getElementById('variableSelect').addEventListener('change', updateDashboard);
     </script>
 </body>
 </html>
