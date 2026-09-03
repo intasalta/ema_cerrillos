@@ -1,6 +1,7 @@
 name: Actualizar Base de Datos SQLite
 
 on:
+  workflow_dispatch: # <-- Permite ejecutar el workflow manualmente desde la web
   push:
     paths:
       - 'downld02.txt' # Cambia esto al nombre del archivo de texto que se actualiza cada hora
