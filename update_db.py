@@ -105,33 +105,34 @@ def parse_and_insert(conn):
 
 
 def export_json(conn):
-    """Exporta las últimas 100 mediciones a un archivo JSON para la web."""
+    """Exporta el historial completo con TODAS las columnas a JSON."""
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT date, time, temp_out, out_hum, wind_speed, bar, rain FROM mediciones ORDER BY id DESC LIMIT 100"
-    )
+    cursor.execute("SELECT * FROM mediciones ORDER BY id ASC")
     rows = cursor.fetchall()
 
-    # Revertir para mantener orden cronológico
-    rows.reverse()
+    data = []
+    for r in rows:
+        row_dict = {}
+        for col in r.keys():
+            val = r[col]
+            # Convertir a número float si es posible, conservando id, date, time y wind_dir como texto
+            if val is not None and col not in ("id", "date", "time", "wind_dir"):
+                try:
+                    row_dict[col] = float(val)
+                except ValueError:
+                    row_dict[col] = val
+            else:
+                row_dict[col] = val
+        data.append(row_dict)
 
-    data = [
-        {
-            "date": r[0],
-            "time": r[1],
-            "temp_out": float(r[2]) if r[2] else None,
-            "out_hum": float(r[3]) if r[3] else None,
-            "wind_speed": float(r[4]) if r[4] else None,
-            "bar": float(r[5]) if r[5] else None,
-            "rain": float(r[6]) if r[6] else None,
-        }
-        for r in rows
-    ]
-
+    # Guarda el JSON sin indentación para optimizar el tamaño del archivo en la web
     with open(JSON_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f)
 
-    print(f"Exportado correctamente a {JSON_FILE}")
+    print(
+        f"Exportado correctamente {len(data)} registros con {len(COLUMNS)} variables a {JSON_FILE}"
+    )
 
 
 if __name__ == "__main__":
