@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estación Meteorológica Cerrillos</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #1a5276;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .cards-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-width: 160px;
+            text-align: center;
+        }
+        .card h3 {
+            margin: 0;
+            font-size: 0.85em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        .card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0 0 0;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🌤️ Estación Meteorológica - Cerrillos</h1>
+        <p id="last-update">Cargando información...</p>
+    </div>
+
+    <!-- TARJETAS DE VALORES ACTUALES -->
+    <div class="cards-container">
+        <div class="card">
+            <h3>Temperatura</h3>
+            <div class="value" id="curr-temp">-- °C</div>
+        </div>
+        <div class="card">
+            <h3>Humedad</h3>
+            <div class="value" id="curr-hum">-- %</div>
+        </div>
+        <div class="card">
+            <h3>Viento</h3>
+            <div class="value" id="curr-wind">-- km/h</div>
+        </div>
+        <div class="card">
+            <h3>Presión</h3>
+            <div class="value" id="curr-bar">-- hPa</div>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS INTERACTIVOS -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <canvas id="tempChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <canvas id="humChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        fetch('datos.json')
+            .then(response => response.json())
+            .then(data => {
+                if (!data || data.length === 0) return;
+
+                const lastRecord = data[data.length - 1];
+                document.getElementById('last-update').innerText = `Última actualización: ${lastRecord.date} ${lastRecord.time}`;
+                document.getElementById('curr-temp').innerText = `${lastRecord.temp_out ?? '--'} °C`;
+                document.getElementById('curr-hum').innerText = `${lastRecord.out_hum ?? '--'} %`;
+                document.getElementById('curr-wind').innerText = `${lastRecord.wind_speed ?? '--'} km/h`;
+                document.getElementById('curr-bar').innerText = `${lastRecord.bar ?? '--'} hPa`;
+
+                const labels = data.map(d => `${d.date} ${d.time}`);
+                const temps = data.map(d => d.temp_out);
+                const hums = data.map(d => d.out_hum);
+
+                // Gráfico Temperatura
+                new Chart(document.getElementById('tempChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Temperatura (°C)',
+                            data: temps,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // Gráfico Humedad
+                new Chart(document.getElementById('humChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Humedad (%)',
+                            data: hums,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            })
+            .catch(err => console.error('Error al cargar datos:', err));
+    </script>
+</body>
+</html>
