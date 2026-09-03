@@ -1,0 +1,29 @@
+name: Actualizar Base de Datos SQLite
+
+on:
+  push:
+    paths:
+      - 'downld02.txt' # Cambia esto al nombre del archivo de texto que se actualiza cada hora
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar el repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Ejecutar script de actualización de SQLite
+      run: python update_db.py
+
+    - name: Guardar cambios en SQLite y hacer Push
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add estacion.db
+        git diff --staged --quiet || (git commit -m "bot: actualizar base de datos sqlite" && git push)
