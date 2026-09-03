@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Climatológico NOAA - INTA Cerrillos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js para visualización de gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 p-6 min-h-screen">
+
+  <header class="max-w-7xl mx-auto mb-8 flex justify-between items-center border-b border-slate-700 pb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-sky-400">Dashboard de Informes Climatológicos</h1>
+      <p class="text-slate-400 text-xs">Visualización automatizada de datos WeatherLink (NOAA)</p>
+    </div>
+    <button onclick="cargarReportes()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs px-4 py-2 rounded-lg transition">
+      Actualizar Datos
+    </button>
+  </header>
+
+  <main class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- SECCIÓN 1: REPORTE MENSUAL (NOAAMO.TXT) -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+      <h2 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+        <i data-feather="calendar" class="text-sky-400"></i> Evolución Diaria del Mes Actual (NOAAMO.TXT)
+      </h2>
+      <div class="h-80 w-full">
+        <canvas id="chartMensual"></canvas>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: REPORTE ANUAL (NOAAYR.TXT) -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+      <h2 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+        <i data-feather="bar-chart-2" class="text-amber-400"></i> Resumen Anual por Meses (NOAAYR.TXT)
+      </h2>
+      <div class="h-80 w-full">
+        <canvas id="chartAnual"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    feather.replace();
+
+    let chartMensualInstance = null;
+    let chartAnualInstance = null;
+
+    // Parser para archivos mensuales de la NOAA (NOAAMO.TXT / NOAAPRMO.TXT)
+    function parseNOAAMensual(text) {
+      const lines = text.split('\n');
+      const startIdx = lines.findIndex(l => l.includes('------------------------------------------------------------------------------------'));
+      if (startIdx === -1) return { dias: [], tempMax: [], tempMin: [], rain: [] };
+
+      const dias = [], tempMax = [], tempMin = [], rain = [];
+
+      for (let i = startIdx + 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes('-------------------------------------------------------------------------------------')) break;
+        if (!line.trim()) continue;
+
+        // Extraer valores mediante expresiones regulares según el formato de columnas fijas
+        const day = line.substring(0, 3).trim();
+        const max = parseFloat(line.substring(9, 14).trim());
+        const min = parseFloat(line.substring(22, 28).trim());
+        const precip = parseFloat(line.substring(46, 52).trim());
+
+        if (day && !isNaN(max) && !isNaN(min)) {
+          dias.push(`Día ${day}`);
+          tempMax.push(max);
+          tempMin.push(min);
+          rain.push(isNaN(precip) ? 0 : precip);
+        }
+      }
+
+      return { dias, tempMax, tempMin, rain };
+    }
+
+    // Parser para archivos anuales de la NOAA (NOAAYR.TXT)
+    function parseNOAAAnual(text) {
+      const lines = text.split('\n');
+      const startIdx = lines.findIndex(l => l.includes('------------------------------------------------------------------------------------'));
+      if (startIdx === -1) return { meses: [], tempMax: [], tempMin: [], rain: [] };
+
+      const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+      const meses = [], tempMax = [], tempMin = [], rain = [];
+
+      for (let i = startIdx + 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes('------------------------------------------------------------------------------------')) break;
+        if (!line.trim()) continue;
+
+        const parts = line.trim().split(/\s+/);
+        if (parts.length >= 4 && !isNaN(parts[1])) {
+          const monthNum = parseInt(parts[1], 10);
+          const max = parseFloat(parts[2]);
+          const min = parseFloat(parts[3]);
+          
+          if (!isNaN(max) && !isNaN(min)) {
+            meses.push(mesesNombres[monthNum - 1] || `Mes ${monthNum}`);
+            tempMax.push(max);
+            tempMin.push(min);
+          }
+        }
+      }
+
+      return { meses, tempMax, tempMin };
+    }
+
+    // Función principal para descargar y renderizar gráficos
+    async function cargarReportes() {
+      try {
+        // 1. Cargar y procesar NOAAMO.TXT
+        const resMo = await fetch('NOAAMO.TXT?t=' + new Date().getTime());
+        if (resMo.ok) {
+          const textMo = await resMo.text();
+          const dataMo = parseNOAAMensual(textMo);
+          renderChartMensual(dataMo);
+        }
+
+        // 2. Cargar y procesar NOAAYR.TXT
+        const resYr = await fetch('NOAAYR.TXT?t=' + new Date().getTime());
+        if (resYr.ok) {
+          const textYr = await resYr.text();
+          const dataYr = parseNOAAAnual(textYr);
+          renderChartAnual(dataYr);
+        }
+
+      } catch (err) {
+        console.error("Error al cargar o procesar los archivos de reporte:", err);
+      }
+    }
+
+    function renderChartMensual(data) {
+      const ctx = document.getElementById('chartMensual').getContext('2d');
+      if (chartMensualInstance) chartMensualInstance.destroy();
+
+      chartMensualInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.dias,
+          datasets: [
+            {
+              label: 'Temp. Máxima (°C)',
+              data: data.tempMax,
+              borderColor: '#ef4444',
+              backgroundColor: '#ef444420',
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: 'Temp. Mínima (°C)',
+              data: data.tempMin,
+              borderColor: '#3b82f6',
+              backgroundColor: '#3b82f620',
+              tension: 0.3,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8' } }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          }
+        }
+      });
+    }
+
+    function renderChartAnual(data) {
+      const ctx = document.getElementById('chartAnual').getContext('2d');
+      if (chartAnualInstance) chartAnualInstance.destroy();
+
+      chartAnualInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.meses,
+          datasets: [
+            {
+              label: 'Media Temp. Máxima (°C)',
+              data: data.tempMax,
+              backgroundColor: '#f59e0b'
+            },
+            {
+              label: 'Media Temp. Mínima (°C)',
+              data: data.tempMin,
+              backgroundColor: '#06b6d4'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#94a3b8' } }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          }
+        }
+      });
+    }
+
+    // Carga inicial
+    document.addEventListener("DOMContentLoaded", cargarReportes);
+  </script>
+</body>
+</html>
