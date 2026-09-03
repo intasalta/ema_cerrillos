@@ -97,15 +97,62 @@
           <i data-feather="activity" class="text-sky-500"></i> Histórico y Tendencias NOAA
         </h2>
         <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">
-          Procesamiento dinámico de archivos meteorológicos de la estación.
+          Procesamiento dinámico del reporte meteorológico mensual.
         </p>
       </div>
     </div>
 
+    <!-- TARJETAS DE VALORES EXTREMOS DEL MES -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- TEMP MAXIMA MES -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm flex items-center gap-4 border-l-4 border-l-red-500">
+        <div class="p-3 bg-red-500/10 text-red-500 rounded-xl">
+          <i data-feather="thermometer" class="h-7 w-7"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Temp. Máxima del Mes</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpi-tmax" class="text-2xl font-bold text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p id="kpi-tmax-date" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Día: -- | Hora: --</p>
+        </div>
+      </div>
+
+      <!-- TEMP MINIMA MES -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm flex items-center gap-4 border-l-4 border-l-blue-500">
+        <div class="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
+          <i data-feather="thermometer" class="h-7 w-7"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Temp. Mínima del Mes</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpi-tmin" class="text-2xl font-bold text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p id="kpi-tmin-date" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Día: -- | Hora: --</p>
+        </div>
+      </div>
+
+      <!-- LLUVIA MAXIMA MES -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm flex items-center gap-4 border-l-4 border-l-sky-500">
+        <div class="p-3 bg-sky-500/10 text-sky-500 rounded-xl">
+          <i data-feather="cloud-rain" class="h-7 w-7"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Máx. Precipitación Día</p>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpi-rain" class="text-2xl font-bold text-slate-800 dark:text-white">-- mm</span>
+          </div>
+          <p id="kpi-rain-date" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Día: --</p>
+        </div>
+      </div>
+
+    </section>
+
     <!-- EVOLUCIÓN MENSUAL TEMPERATURAS -->
     <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm transition-colors">
       <h3 class="text-base font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2">
-        <i data-feather="thermometer" class="text-red-500 h-5 w-5"></i> Temperaturas Diarias del Mes Actual (NOAAMO.TXT)
+        <i data-feather="trending-up" class="text-red-500 h-5 w-5"></i> Evolución de Temperaturas Diarias (NOAAMO.TXT)
       </h3>
       <div class="h-80 w-full">
         <canvas id="chartMensual"></canvas>
@@ -115,7 +162,7 @@
     <!-- PRECIPITACIONES DIARIAS DEL MES -->
     <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm transition-colors">
       <h3 class="text-base font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2">
-        <i data-feather="cloud-rain" class="text-blue-500 h-5 w-5"></i> Precipitaciones Diarias (mm)
+        <i data-feather="bar-chart-2" class="text-blue-500 h-5 w-5"></i> Precipitaciones Diarias (mm)
       </h3>
       <div class="h-64 w-full">
         <canvas id="chartLluvia"></canvas>
@@ -169,7 +216,6 @@
       }
     });
 
-    // Instancias de Gráficos
     let chartMensualInstance = null;
     let chartLluviaInstance = null;
     let chartAnualInstance = null;
@@ -177,27 +223,62 @@
     function parseNOAAMensual(text) {
       const lines = text.split('\n');
       const startIdx = lines.findIndex(l => l.includes('------------------------------------------------------------------------------------'));
-      if (startIdx === -1) return { dias: [], tempMax: [], tempMin: [], rain: [] };
-
+      
       const dias = [], tempMax = [], tempMin = [], rain = [];
+      let maxTemp = -99, maxTempDay = '--', maxTempTime = '--';
+      let minTemp = 99, minTempDay = '--', minTempTime = '--';
+      let maxRain = 0, maxRainDay = '--';
 
-      for (let i = startIdx + 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.includes('-------------------------------------------------------------------------------------')) break;
-        if (!line.trim()) continue;
+      if (startIdx !== -1) {
+        for (let i = startIdx + 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.includes('-------------------------------------------------------------------------------------')) break;
+          if (!line.trim()) continue;
 
-        const day = line.substring(0, 3).trim();
-        const max = parseFloat(line.substring(9, 14).trim());
-        const min = parseFloat(line.substring(22, 28).trim());
-        const precip = parseFloat(line.substring(46, 52).trim());
+          const day = line.substring(0, 3).trim();
+          const max = parseFloat(line.substring(9, 14).trim());
+          const maxTime = line.substring(15, 21).trim();
+          const min = parseFloat(line.substring(22, 28).trim());
+          const minTime = line.substring(29, 35).trim();
+          const precip = parseFloat(line.substring(46, 52).trim());
 
-        if (day && !isNaN(max) && !isNaN(min)) {
-          dias.push(`Día ${day}`);
-          tempMax.push(max);
-          tempMin.push(min);
-          rain.push(isNaN(precip) ? 0 : precip);
+          if (day && !isNaN(max) && !isNaN(min)) {
+            dias.push(`Día ${day}`);
+            tempMax.push(max);
+            tempMin.push(min);
+
+            // Buscar extremos del mes
+            if (max > maxTemp) {
+              maxTemp = max;
+              maxTempDay = day;
+              maxTempTime = maxTime || '--';
+            }
+
+            if (min < minTemp) {
+              minTemp = min;
+              minTempDay = day;
+              minTempTime = minTime || '--';
+            }
+
+            const currentRain = isNaN(precip) ? 0 : precip;
+            rain.push(currentRain);
+            if (currentRain > maxRain) {
+              maxRain = currentRain;
+              maxRainDay = day;
+            }
+          }
         }
       }
+
+      // Actualizar UI de KPIs
+      document.getElementById('kpi-tmax').innerText = maxTemp !== -99 ? `${maxTemp.toFixed(1)} °C` : '-- °C';
+      document.getElementById('kpi-tmax-date').innerText = `Día: ${maxTempDay} | Hora: ${maxTempTime}`;
+
+      document.getElementById('kpi-tmin').innerText = minTemp !== 99 ? `${minTemp.toFixed(1)} °C` : '-- °C';
+      document.getElementById('kpi-tmin-date').innerText = `Día: ${minTempDay} | Hora: ${minTempTime}`;
+
+      document.getElementById('kpi-rain').innerText = `${maxRain.toFixed(1)} mm`;
+      document.getElementById('kpi-rain-date').innerText = maxRain > 0 ? `Día: ${maxRainDay}` : 'Sin lluvia en el mes';
 
       return { dias, tempMax, tempMin, rain };
     }
