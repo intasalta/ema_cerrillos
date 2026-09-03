@@ -1,10 +1,13 @@
 name: Actualizar Base de Datos SQLite
 
 on:
-  workflow_dispatch: # <-- Permite ejecutar el workflow manualmente desde la web
+  workflow_dispatch:
   push:
     paths:
-      - 'downld02.txt' # Cambia esto al nombre del archivo de texto que se actualiza cada hora
+      - 'downld02.txt'
+
+permissions:
+  contents: write  # <-- Esto le da permiso al bot para guardar y hacer push en tu repositorio
 
 jobs:
   build:
