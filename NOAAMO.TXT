@@ -1,51 +1,17 @@
-                   MONTHLY CLIMATOLOGICAL SUMMARY for SEP. 2026
 
-NAME: Prueba   CITY:    STATE:  
-ELEV:     0 m  LAT:  25° 18' 00" S  LONG:  66° 48' 00" W
-
-                   TEMPERATURE (°C), RAIN  (mm), WIND SPEED (km/hr)
-
-                                      HEAT  COOL        AVG
-    MEAN                              DEG   DEG         WIND                 DOM
-DAY TEMP  HIGH   TIME   LOW    TIME   DAYS  DAYS  RAIN  SPEED HIGH   TIME    DIR
-------------------------------------------------------------------------------------
- 1
- 2  22.2  22.6   15:40  20.0    9:15   0.0   2.3   0.0   0.0   0.0     ---   ---
- 3  22.2  24.0   13:00  20.3    8:00   0.0   3.8   0.0   0.0   0.0     ---   ---
- 4  22.1  23.6    9:00  21.0    8:00   0.0   1.4   0.0   0.0   0.0     ---   ---
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
--------------------------------------------------------------------------------------
-    22.2  24.0     3    20.0     2     0.0   7.6   0.0   0.0   0.0     ---   ---
-
-Max >=  32.0:  0
-Max <=   0.0:  0
-Min <=   0.0:  0
-Min <= -18.0:  0
-Max Rain: 0.00 ON 01/09/26
-Days of Rain: 0 (> .2 mm) 0 (> 2 mm) 0 (> 20 mm)
-Heat Base:  18.3  Cool Base:  18.3  Method: Integration
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>503 Backend.max_conn reached</title>
+  </head>
+  <body>
+    <h1>Error 503 Backend.max_conn reached</h1>
+    <p>Backend.max_conn reached</p>
+    <h3>Error 54113</h3>
+    <p>Details: cache-eze2230048-EZE 1788972197 547351178</p>
+    <hr>
+    <p>Varnish cache server</p>
+  </body>
+</html>

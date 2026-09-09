@@ -1,64 +1,17 @@
-                            ANNUAL CLIMATOLOGICAL SUMMARY
 
-NAME: Prueba  CITY:    STATE:   
-ELEV:     0 m  LAT:  25° 18' 00" S  LONG:  66° 48' 00" W
-
-               TEMPERATURE (°C), HEAT BASE 18.3, COOL BASE 18.3
-                          DEP.  HEAT  COOL                                          
-        MEAN  MEAN        FROM  DEG   DEG                        MAX  MAX  MIN  MIN 
- YR MO  MAX   MIN   MEAN  NORM  DAYS  DAYS  HI  DATE  LOW  DATE  >=32 <=0  <=0  <=-18 
-------------------------------------------------------------------------------------
- 26  1
- 26  2
- 26  3
- 26  4
- 26  5
- 26  6
- 26  7
- 26  8
- 26  9  23.4  20.4  22.2   0.0     0     8  24.0   3  20.0    2    0    0    0    0
- 26 10
- 26 11
- 26 12
-------------------------------------------------------------------------------------
-        23.4  20.4  22.2   0.0     0     8  24.0 SEP  20.0  SEP    0    0    0    0
-
-                                PRECIPITATION (mm)
-
-               DEP.   MAX        DAYS OF RAIN 
-               FROM   OBS.          OVER
- YR MO  TOTAL  NORM   DAY  DATE  .2   2   20
----------------------------------------------
- 26  1
- 26  2
- 26  3
- 26  4
- 26  5
- 26  6
- 26  7
- 26  8
- 26  9   0.0    0.0   0.0    1    0    0    0
- 26 10
- 26 11
- 26 12
----------------------------------------------
-         0.0   0.0   0.0  JAN    0    0    0
-
-                                WIND SPEED (km/hr)
-                          DOM
- YR MO   AVG.  HI   DATE  DIR
----------------------------------
- 26  1
- 26  2
- 26  3
- 26  4
- 26  5
- 26  6
- 26  7
- 26  8
- 26  9   0.0   0.0    2   ---
- 26 10
- 26 11
- 26 12
----------------------------------
-         0.0   0.0  SEP  ---
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>503 Backend.max_conn reached</title>
+  </head>
+  <body>
+    <h1>Error 503 Backend.max_conn reached</h1>
+    <p>Backend.max_conn reached</p>
+    <h3>Error 54113</h3>
+    <p>Details: cache-eze2230054-EZE 1788972209 3303241308</p>
+    <hr>
+    <p>Varnish cache server</p>
+  </body>
+</html>
