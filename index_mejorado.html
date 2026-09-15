@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estación Meteorológica Automática INTA Cerrillos</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Configuración para soporte de clase 'dark' en Tailwind
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    /* Ocultar barra de scroll en el menú pero mantener la funcionalidad */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <script>
+    // Modo oscuro por defecto (solo cambia a claro si el usuario lo eligió explícitamente)
+    if (localStorage.theme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+  <header class="bg-gradient-to-r from-[#0B7BAF] via-[#08618B] to-[#054869] text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      
+      <div class="flex items-center space-x-4">
+        <img src="./logo_inta.png" alt="Logo INTA" class="h-14 bg-white p-1 rounded-lg shadow-md transition-transform hover:scale-105">
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">Estación Meteorológica Automática</h1>
+          <p class="text-blue-200 text-xs font-medium">INTA Cerrillos - Salta</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:block text-right text-xs bg-black/20 backdrop-blur-md p-2.5 rounded-xl border border-white/10">
+          <p class="font-semibold text-blue-100 flex items-center justify-end gap-1">
+            <i data-feather="map-pin" class="h-3.5 w-3.5 text-sky-300"></i> Lat -24.89 | Long  -65.47
+          </p>
+          <p class="text-blue-200 text-[11px] mt-0.5">Altitud: 1235 msnm | Davis Vantage Pro 2</p>
+        </div>
+
+        <button id="theme-toggle" type="button" aria-label="Cambiar Tema" class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-blue-100 border border-white/20 transition-all focus:outline-none focus:ring-2 focus:ring-white/50">
+          <i id="theme-toggle-dark-icon" data-feather="moon" class="hidden h-5 w-5"></i>
+          <i id="theme-toggle-light-icon" data-feather="sun" class="hidden h-5 w-5 text-amber-300"></i>
+        </button>
+      </div>
+    </div>
+
+    <nav class="bg-black/20 backdrop-blur-md border-t border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between overflow-x-auto py-2 text-xs font-medium gap-2 no-scrollbar whitespace-nowrap">
+          
+          <div class="flex items-center gap-2">
+            <a href="https://intasalta.github.io/emas/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all shadow-sm">
+              <i data-feather="home" class="h-3.5 w-3.5"></i> Inicio
+            </a>
+
+            <a href="resumen.html" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold transition-all shadow-sm">
+              <i data-feather="bar-chart-2" class="h-3.5 w-3.5"></i> Resumen Climático (Mes / Año)
+            </a>
+
+            <a href="downld02.xlsx" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all shadow-sm" title="Descargar datos crudos de los últimos 2 días en formato Excel">
+              <i data-feather="download" class="h-3.5 w-3.5 text-emerald-300"></i> Datos 2 Días (XLSX)
+            </a>
+
+            <a href="downld08.xlsx" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all shadow-sm" title="Descargar datos crudos de los últimos 8 días en formato Excel">
+              <i data-feather="download" class="h-3.5 w-3.5 text-emerald-300"></i> Datos 8 Días (XLSX)
+            </a>
+			
+            <a href="https://intasalta.github.io/met/" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 font-semibold border border-amber-400/30 transition-all ml-auto">
+              <i data-feather="database" class="h-3.5 w-3.5"></i> Datos Históricos
+            </a>
+          </div>
+
+          <button id="info-modal-btn" type="button" class="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-blue-100 border border-white/20 text-xs font-semibold transition-all">
+            <i data-feather="info" class="h-3.5 w-3.5"></i>
+            <span>¿Quiénes Somos?</span>
+          </button>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6">
+
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4 md:p-6 border border-slate-200 dark:border-slate-700/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-colors">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">Última actualización</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2 mt-0.5">
+          <i data-feather="clock" class="text-sky-500 h-5 w-5"></i>
+          - </h2>
+      </div>
+      
+      <div class="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-feather="sunrise" class="h-5 w-5 text-amber-500"></i>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400">Salida Sol</p>
+            <p class="font-semibold text-slate-700 dark:text-slate-200">hs</p>
+          </div>
+        </div>
+        
+        <div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+        
+        <div class="flex items-center gap-2">
+          <i data-feather="sunset" class="h-5 w-5 text-orange-500"></i>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400">Puesta Sol</p>
+            <p class="font-semibold text-slate-700 dark:text-slate-200">hs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60 overflow-hidden flex flex-col justify-between transition-colors">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="thermometer" class="h-5 w-5 text-red-500"></i> Temperatura
+            </h3>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white"><span>°C</span></span>
+          </div>
+
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-semibold uppercase">
+              <tr>
+                <th class="py-2 px-1">Período</th>
+                <th class="py-2 px-1 text-center">Mínima</th>
+                <th class="py-2 px-1 text-center">Máxima</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td class="py-2 font-medium">Diaria</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">°C</td>
+                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold">°C</td>
+              </tr>
+              <tr class="text-[10px] text-slate-400">
+                <td class="py-1">A hs:</td>
+                <td class="py-1 text-center"></td>
+                <td class="py-1 text-center"></td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Mensual</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">°C</td>
+                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold">°C</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Anual</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold"></td>
+                <td class="py-2 text-center text-red-600 dark:text-red-400 font-semibold"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
+          <div class="h-48 w-full">
+            <canvas id="chartTemp24h"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Temperatura últimas 24 hs</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60 overflow-hidden flex flex-col justify-between transition-colors">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="droplet" class="h-5 w-5 text-blue-500"></i> Humedad
+            </h3>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white"><span></span></span>
+          </div>
+
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-semibold uppercase">
+              <tr>
+                <th class="py-2 px-1">Período</th>
+                <th class="py-2 px-1 text-center">Mínima</th>
+                <th class="py-2 px-1 text-center">Máxima</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td class="py-2 font-medium">Diaria</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">%</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">%</td>
+              </tr>
+              <tr class="text-[10px] text-slate-400">
+                <td class="py-1">A hs:</td>
+                <td class="py-1 text-center"></td>
+                <td class="py-1 text-center"></td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Mensual</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">%</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold">%</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Anual</td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold"></td>
+                <td class="py-2 text-center text-blue-600 dark:text-blue-400 font-semibold"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
+          <div class="h-48 w-full">
+            <canvas id="chartHum24h"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Humedad Relativa últimas 24 hs</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60 overflow-hidden flex flex-col justify-between transition-colors">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="activity" class="h-5 w-5 text-amber-500"></i> Sensación Térmica
+            </h3>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white"><span>°C</span></span>
+          </div>
+
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-semibold uppercase">
+              <tr>
+                <th class="py-2 px-1">Variable</th>
+                <th class="py-2 px-1 text-center">Valor</th>
+                <th class="py-2 px-1 text-center">Hora</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td class="py-2 font-medium">Punto de Rocío</td>
+                <td class="py-2 text-center font-semibold text-sky-600 dark:text-sky-400">°C</td>
+                <td class="py-2 text-center text-slate-400">Actual</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Sens. por Viento</td>
+                <td class="py-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">°C</td>
+                <td class="py-2 text-center text-slate-400">Actual</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Índice Calor Máx</td>
+                <td class="py-2 text-center font-semibold text-amber-600 dark:text-amber-400">°C</td>
+                <td class="py-2 text-center text-slate-400"></td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Mín. Sens. Viento</td>
+                <td class="py-2 text-center font-semibold text-blue-600 dark:text-blue-400">°C</td>
+                <td class="py-2 text-center text-slate-400"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
+          <div class="h-48 w-full">
+            <canvas id="chartDew24h"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Punto de Rocío últimas 24 hs</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60 overflow-hidden flex flex-col justify-between transition-colors">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="wind" class="h-5 w-5 text-emerald-500"></i> Viento
+            </h3>
+            <div class="text-right">
+              <span class="text-3xl font-extrabold text-slate-900 dark:text-white"></span>
+              <span class="text-xs font-semibold text-slate-500">km/h</span>
+            </div>
+          </div>
+
+          <div class="bg-emerald-50 dark:bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40 mb-4 text-center">
+            <p class="text-xs text-emerald-800 dark:text-emerald-300 font-medium">
+              Dirección actual: <span class="font-bold uppercase"></span>
+            </p>
+          </div>
+
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-semibold uppercase">
+              <tr>
+                <th class="py-2 px-1">Período</th>
+                <th class="py-2 px-1 text-center">Ráfaga Máx.</th>
+                <th class="py-2 px-1 text-center">Dirección</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td class="py-2 font-medium">Diario</td>
+                <td class="py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">km/h</td>
+                <td class="py-2 text-center font-semibold"></td>
+              </tr>
+              <tr class="text-[10px] text-slate-400">
+                <td class="py-1">A hs:</td>
+                <td class="py-1 text-center" colspan="2"></td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Mensual</td>
+                <td class="py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">km/h</td>
+                <td class="py-2 text-center">-</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Anual</td>
+                <td class="py-2 text-center font-bold text-emerald-600 dark:text-emerald-400"></td>
+                <td class="py-2 text-center">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
+          <div class="h-48 w-full">
+            <canvas id="chartViento24h"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Velocidad del Viento últimas 24 hs</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60 overflow-hidden flex flex-col justify-between transition-colors">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="compass" class="h-5 w-5 text-indigo-500"></i> Presión
+            </h3>
+            <div class="text-right">
+              <span class="text-3xl font-extrabold text-slate-900 dark:text-white"></span>
+              <span class="text-xs font-semibold text-slate-500">hPa</span>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50 dark:bg-indigo-950/30 p-2.5 rounded-xl border border-indigo-100 dark:border-indigo-900/40 mb-4 text-center">
+            <p class="text-xs text-indigo-800 dark:text-indigo-300 font-medium">
+              Tendencia: <span class="font-bold"></span>
+            </p>
+          </div>
+
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-semibold uppercase">
+              <tr>
+                <th class="py-2 px-1">Período</th>
+                <th class="py-2 px-1 text-center">Mínima</th>
+                <th class="py-2 px-1 text-center">Máxima</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td class="py-2 font-medium">Diaria</td>
+                <td class="py-2 text-center font-semibold text-slate-700 dark:text-slate-200">hPa</td>
+                <td class="py-2 text-center font-semibold text-slate-700 dark:text-slate-200">hPa</td>
+              </tr>
+              <tr class="text-[10px] text-slate-400">
+                <td class="py-1">A hs:</td>
+                <td class="py-1 text-center"></td>
+                <td class="py-1 text-center"></td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Mensual</td>
+                <td class="py-2 text-center font-semibold text-slate-700 dark:text-slate-200">hPa</td>
+                <td class="py-2 text-center font-semibold text-slate-700 dark:text-slate-200">hPa</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Anual</td>
+                <td class="py-2 text-center font-semibold text-slate-700 dark:text-slate-200"></td>
+                <td class="py-2 text-center font-semibold text-slate-700 dark:text-slate-200"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
+          <div class="h-48 w-full">
+            <canvas id="chartBar24h"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Presión Barométrica últimas 24 hs</p>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/60 overflow-hidden flex flex-col justify-between transition-colors">
+        <div class="p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="cloud-rain" class="h-5 w-5 text-sky-500"></i> Precipitaciones
+            </h3>
+            <div class="text-right">
+              <span class="text-3xl font-extrabold text-sky-600 dark:text-sky-400"></span>
+              <span class="text-xs font-semibold text-slate-500">mm hoy</span>
+            </div>
+          </div>
+
+          <div class="bg-sky-50 dark:bg-sky-950/30 p-2.5 rounded-xl border border-sky-100 dark:border-sky-900/40 mb-4 text-center">
+            <p class="text-xs text-sky-800 dark:text-sky-300 font-medium">
+              Intensidad actual: <span class="font-bold">mm/h</span>
+            </p>
+          </div>
+
+          <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 font-semibold uppercase">
+              <tr>
+                <th class="py-2 px-1">Período</th>
+                <th class="py-2 px-1 text-right">Acumulado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td class="py-2 font-medium">Tormenta Actual</td>
+                <td class="py-2 text-right font-bold text-sky-600 dark:text-sky-400">mm</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Mensual</td>
+                <td class="py-2 text-right font-bold text-sky-600 dark:text-sky-400">mm</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-medium">Anual Total</td>
+                <td class="py-2 text-right font-bold text-sky-600 dark:text-sky-400">mm</td>
+              </tr>
+              <tr class="text-[10px] text-slate-400">
+                <td class="py-1">Tasa Máx. Hoy:</td>
+                <td class="py-1 text-right">mm/h a las </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 border-t border-slate-100 dark:border-slate-700/50 text-center">
+          <div class="h-48 w-full">
+            <canvas id="chartLluvia24h"></canvas>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Lluvia acumulada hora a hora (Últimas 24h)</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm space-y-4 transition-colors">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/50 pb-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 mb-1 border border-sky-200 dark:border-sky-800">
+            <i data-feather="clock" class="h-3 w-3"></i> Registro Continuo
+          </div>
+          <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <i data-feather="cloud-drizzle" class="text-sky-500 h-5 w-5"></i> Monitoreo Agrometeorológico Interactivo (8 Días)
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Evolución de Intensidad de Lluvia, Evapotranspiración (ET) y Radiación Solar. Utiliza la barra inferior para zoom y deslizamiento.
+          </p>
+        </div>
+      </div>
+
+      <div id="chartHietograma" class="w-full h-[450px]"></div>
+    </div>
+
+  </main>
+
+  <footer class="bg-slate-800 text-slate-300 border-t border-slate-700 mt-12 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        
+        <div>
+          <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-3">INTA EEA Salta</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Estación Meteorológica Automática Davis Vantage Pro 2.<br>
+            Ubicación: Cerrillos, Salta, Argentina.<br>
+            Provisión continua de datos agroclimáticos regionales.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-3">Contacto e Información</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Instituto Nacional de Tecnología Agropecuaria<br>
+            Ruta Nacional 68 Km 172 (Cerrillos)<br>
+            Correo: eea.salta@inta.gob.ar
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-3">Sistema de Registro</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Actualización automática periódica mediante procesamiento en sitio Weatherlink.<br>
+            &copy; 2026 INTA - Todos los derechos reservados.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <div id="info-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+        <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+          <i data-feather="info" class="text-sky-500 h-5 w-5"></i> ¿Quiénes Somos?
+        </h3>
+        <button id="close-modal-btn" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+          <i data-feather="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-600 dark:text-slate-300 space-y-3 leading-relaxed">
+        <p>
+          Este servicio de información meteorológica es gestionado por el <strong>Grupo de Recursos Naturales de la Estación Experimental Agropecuaria (EEA) Salta del INTA</strong>.
+        </p>
+        <p>
+          Nuestra Estación Meteorológica Automática registra de forma continua parámetros clave como temperatura, humedad, precipitaciones, velocidad y dirección del viento, radiación solar y presión barométrica.
+        </p>
+        <p>
+          Estos datos son de libre acceso y están orientados a apoyar las actividades productivas, científicas y educativas de la región del Valle de Lerma y la provincia de Salta.
+        </p>
+      </div>
+
+      <div class="pt-2 text-right">
+        <button id="confirm-modal-btn" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold shadow-md transition-all">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    feather.replace();
+
+    // 1. CAMBIO DE TEMA CLARO / OSCURO
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+    if (document.documentElement.classList.contains('dark')) {
+      lightIcon.classList.remove('hidden');
+    } else {
+      darkIcon.classList.remove('hidden');
+    }
+
+    themeToggleBtn.addEventListener('click', function() {
+      darkIcon.classList.toggle('hidden');
+      lightIcon.classList.toggle('hidden');
+
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+      // Re-renderizar Hietograma si existe para adaptar el fondo del tema
+      if (typeof renderHietograma === 'function' && window.cachedDlData) {
+        renderHietograma(window.cachedDlData);
+      }
+    });
+
+    // 2. LÓGICA DEL MODAL INFORMATIVO "¿QUIÉNES SOMOS?"
+    const infoModalBtn = document.getElementById('info-modal-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const confirmModalBtn = document.getElementById('confirm-modal-btn');
+
+    function openModal() { infoModal.classList.remove('hidden'); }
+    function closeModal() { infoModal.classList.add('hidden'); }
+
+    infoModalBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    confirmModalBtn.addEventListener('click', closeModal);
+
+    infoModal.addEventListener('click', function(e) {
+      if (e.target === infoModal) closeModal();
+    });
+
+    // 3. PARSER DE DATOS CRUDOS DE downld08.txt
+    function parseDownld08(text) {
+      const lines = text.split('\n');
+      const records = [];
+      let startParsing = false;
+
+      for (let line of lines) {
+        if (line.includes('---') && line.includes('---')) {
+          startParsing = true;
+          continue;
+        }
+        if (!startParsing) continue;
+
+        const parts = line.trim().split(/\s+/);
+        if (parts.length < 15) continue;
+
+        const dateStr = parts[0];
+        const timeStr = parts[1];
+        if (!dateStr.includes('/')) continue;
+
+        const temp = parseFloat(parts[2]);
+        const hum = parseFloat(parts[5]);
+        const dew = parseFloat(parts[6]);
+        const windSpeed = parseFloat(parts[7]);
+        const bar = parseFloat(parts[16]);
+        const rain = parseFloat(parts[17]);
+        const rainRate = parseFloat(parts[18]);
+        const solar = parseFloat(parts[19]);
+        const et = parseFloat(parts[26]);
+
+        records.push({
+          datetime: `${dateStr} ${timeStr}`,
+          temp: isNaN(temp) ? null : temp,
+          hum: isNaN(hum) ? null : hum,
+          dew: isNaN(dew) ? null : dew,
+          windSpeed: isNaN(windSpeed) ? 0 : windSpeed,
+          bar: isNaN(bar) ? null : bar,
+          rain: isNaN(rain) ? 0 : rain,
+          rainRate: isNaN(rainRate) ? 0 : rainRate,
+          solar: isNaN(solar) ? 0 : solar,
+          et: isNaN(et) ? 0 : et
+        });
+      }
+      return records;
+    }
+
+    // 4. GENERACIÓN DE GRÁFICOS CON CHART.JS Y PLOTLY EN LUGAR DE GIFS
+    let chartTemp, chartHum, chartDew, chartViento, chartBar, chartLluvia;
+
+    function createChartJS(canvasId, label, labels, data, color, type = 'line') {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      return new Chart(ctx, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: label,
+            data: data,
+            borderColor: color,
+            backgroundColor: type === 'bar' ? color : color + '22',
+            borderWidth: 2,
+            fill: type !== 'bar',
+            tension: 0.3,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              ticks: { maxTicksLimit: 6, font: { size: 10 } },
+              grid: { display: false }
+            },
+            y: {
+              ticks: { font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderGraficosVivos(records) {
+      // Filtrar los últimos 24 registros (24 horas) para los minigráficos
+      const last24 = records.slice(-24);
+      const labels24 = last24.map(r => r.datetime.split(' ')[1] || r.datetime);
+
+      if (chartTemp) chartTemp.destroy();
+      chartTemp = createChartJS('chartTemp24h', 'Temp (°C)', labels24, last24.map(r => r.temp), '#ef4444');
+
+      if (chartHum) chartHum.destroy();
+      chartHum = createChartJS('chartHum24h', 'Humedad (%)', labels24, last24.map(r => r.hum), '#3b82f6');
+
+      if (chartDew) chartDew.destroy();
+      chartDew = createChartJS('chartDew24h', 'Punto de Rocío (°C)', labels24, last24.map(r => r.dew), '#f59e0b');
+
+      if (chartViento) chartViento.destroy();
+      chartViento = createChartJS('chartViento24h', 'Viento (km/h)', labels24, last24.map(r => r.windSpeed), '#10b981');
+
+      if (chartBar) chartBar.destroy();
+      chartBar = createChartJS('chartBar24h', 'Presión (hPa)', labels24, last24.map(r => r.bar), '#8b5cf6');
+
+      if (chartLluvia) chartLluvia.destroy();
+      chartLluvia = createChartJS('chartLluvia24h', 'Lluvia (mm)', labels24, last24.map(r => r.rain), '#0284c7', 'bar');
+    }
+
+    function renderHietograma(records) {
+      window.cachedDlData = records;
+      const xTimes = records.map(r => r.datetime);
+      const yRainRate = records.map(r => r.rainRate);
+      const ySolar = records.map(r => r.solar);
+      const yET = records.map(r => r.et);
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const fontColor = isDark ? '#cbd5e1' : '#334155';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      const traceRain = {
+        x: xTimes,
+        y: yRainRate,
+        name: 'Intensidad Lluvia (mm/h)',
+        type: 'bar',
+        marker: { color: '#0284c7' },
+        yaxis: 'y'
+      };
+
+      const traceET = {
+        x: xTimes,
+        y: yET,
+        name: 'Evapotranspiración (mm)',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#10b981', width: 2 },
+        yaxis: 'y'
+      };
+
+      const traceSolar = {
+        x: xTimes,
+        y: ySolar,
+        name: 'Radiación Solar (W/m²)',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#f59e0b', width: 1.5 },
+        yaxis: 'y2'
+      };
+
+      const layout = {
+        margin: { t: 20, r: 50, l: 50, b: 40 },
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: fontColor, family: 'Inter, sans-serif', size: 11 },
+        showlegend: true,
+        legend: { orientation: 'h', x: 0, y: 1.15 },
+        xaxis: {
+          gridcolor: gridColor,
+          rangeslider: { visible: true },
+          type: 'category'
+        },
+        yaxis: {
+          title: 'Lluvia / ET (mm)',
+          gridcolor: gridColor,
+          side: 'left'
+        },
+        yaxis2: {
+          title: 'Radiación Solar (W/m²)',
+          overlaying: 'y',
+          side: 'right',
+          showgrid: false
+        }
+      };
+
+      Plotly.newPlot('chartHietograma', [traceRain, traceET, traceSolar], layout, { responsive: true, displayModeBar: false });
+    }
+
+    // 5. CARGA AUTOMÁTICA DE ARCHIVOS CON FETCH
+    async function cargarDatosDinamicos() {
+      try {
+        const res = await fetch('downld08.txt?t=' + new Date().getTime());
+        if (res.ok) {
+          const text = await res.text();
+          const records = parseDownld08(text);
+          if (records.length > 0) {
+            renderGraficosVivos(records);
+            renderHietograma(records);
+          }
+        } else {
+          console.warn('No se pudo obtener downld08.txt');
+        }
+      } catch (err) {
+        console.error('Error al realizar fetch de los datos climatológicos:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarDatosDinamicos);
+  </script>
+</body>
+</html>
