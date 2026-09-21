@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Climatológico NOAA - INTA EEA Salta</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  
+  <!-- Chart.js, Plotly.js & Feather Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <script>
+    if (localStorage.theme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+  <!-- HEADER INSTITUCIONAL -->
+  <header class="bg-gradient-to-r from-[#0B7BAF] via-[#08618B] to-[#054869] text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      
+      <div class="flex items-center space-x-4">
+        <img src="./logo_inta.png" alt="Logo INTA" class="h-14 bg-white p-1 rounded-lg shadow-md transition-transform hover:scale-105">
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight">Estación Meteorológica Automática</h1>
+          <p class="text-blue-200 text-xs font-medium">INTA EEA Salta - Cerrillos</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:block text-right text-xs bg-black/20 backdrop-blur-md p-2.5 rounded-xl border border-white/10">
+          <p class="font-semibold text-blue-100 flex items-center justify-end gap-1">
+            <i data-feather="map-pin" class="h-3.5 w-3.5 text-sky-300"></i> Lat -24.89 | Long -65.47
+          </p>
+          <p class="text-blue-200 text-[11px] mt-0.5">Altitud: 1235 msnm | Davis Vantage Pro 2</p>
+        </div>
+
+        <button id="theme-toggle" type="button" aria-label="Cambiar Tema" class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-blue-100 border border-white/20 transition-all focus:outline-none focus:ring-2 focus:ring-white/50">
+          <i id="theme-toggle-dark-icon" data-feather="moon" class="hidden h-5 w-5"></i>
+          <i id="theme-toggle-light-icon" data-feather="sun" class="hidden h-5 w-5 text-amber-300"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- NAVBAR Y PESTAÑAS DE VISTA -->
+    <nav class="bg-black/20 backdrop-blur-md border-t border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between overflow-x-auto py-2 text-xs font-medium gap-2 no-scrollbar whitespace-nowrap">
+          
+          <!-- Enlace Principal -->
+          <div class="flex items-center gap-2">
+            <a href="index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all shadow-sm">
+              <i data-feather="home" class="h-3.5 w-3.5"></i> Principal
+            </a>
+          </div>
+
+          <!-- Selector de Pestañas: Mes / Año / Todo -->
+          <div class="flex items-center bg-black/30 p-0.5 rounded-lg border border-white/15 text-xs font-semibold gap-1">
+            <button id="tab-btn-mes" onclick="cambiarPestana('mes')" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500 text-white shadow-sm transition-all">
+              <i data-feather="calendar" class="h-3.5 w-3.5"></i> Mes en Curso
+            </button>
+            <button id="tab-btn-anio" onclick="cambiarPestana('anio')" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-blue-100 hover:text-white hover:bg-white/10 transition-all">
+              <i data-feather="trending-up" class="h-3.5 w-3.5"></i> Año en Curso
+            </button>
+            <button id="tab-btn-todo" onclick="cambiarPestana('todo')" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-blue-100 hover:text-white hover:bg-white/10 transition-all">
+              <i data-feather="layers" class="h-3.5 w-3.5"></i> Vista Completa
+            </button>
+            <button onclick="cargarReportes()" title="Actualizar datos" class="p-1 rounded-md text-blue-200 hover:text-white hover:bg-white/15 transition-all border-l border-white/15 pl-1.5">
+              <i id="icon-refresh" data-feather="refresh-cw" class="h-3.5 w-3.5"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-10">
+
+    <!-- =============================================================== -->
+    <!-- SECCIÓN 1: MES EN CURSO (NOAAMO.TXT) -->
+    <!-- =============================================================== -->
+    <section id="seccion-mes" class="space-y-6 transition-all duration-300">
+      
+      <!-- Encabezado Sección Mes -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 mb-1 border border-sky-200 dark:border-sky-800">
+            <i data-feather="calendar" class="h-3.5 w-3.5"></i> Reporte Mensual
+          </div>
+          <h2 id="titulo-mes" class="text-2xl font-bold text-slate-800 dark:text-white">
+            Resumen Climatológico Mensual
+          </h2>
+          <p id="subtitulo-mes" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Evolución meteorológica diaria del mes en curso.
+          </p>
+        </div>
+
+        <span id="badge-dias-mes" class="text-xs px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 font-medium text-slate-600 dark:text-slate-300">
+          Cargando datos...
+        </span>
+      </div>
+
+      <!-- Tarjetas KPI del Mes (Grid 6 elementos) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        
+        <!-- KPI: Temp Máxima -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-red-500">
+          <div class="flex items-center justify-between text-red-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">T. Máxima</span>
+            <i data-feather="arrow-up-right" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-mes-tmax" class="text-2xl font-black text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p id="kpi-mes-tmax-date" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Día: -- | Hora: --</p>
+        </div>
+
+        <!-- KPI: Temp Mínima -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-blue-500">
+          <div class="flex items-center justify-between text-blue-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">T. Mínima</span>
+            <i data-feather="arrow-down-right" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-mes-tmin" class="text-2xl font-black text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p id="kpi-mes-tmin-date" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Día: -- | Hora: --</p>
+        </div>
+
+        <!-- KPI: Temp Media -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-amber-500">
+          <div class="flex items-center justify-between text-amber-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">T. Media</span>
+            <i data-feather="thermometer" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-mes-tmean" class="text-2xl font-black text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Media del periodo</p>
+        </div>
+
+        <!-- KPI: Lluvia Total Mes -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-sky-500">
+          <div class="flex items-center justify-between text-sky-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Lluvia Total</span>
+            <i data-feather="cloud-rain" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-mes-rain-total" class="text-2xl font-black text-slate-800 dark:text-white">-- mm</span>
+          </div>
+          <p id="kpi-mes-rain-days" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">-- días con lluvia</p>
+        </div>
+
+        <!-- KPI: Máx Lluvia en 24h -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-indigo-500">
+          <div class="flex items-center justify-between text-indigo-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Máx. Lluvia 24h</span>
+            <i data-feather="droplet" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-mes-rain-max" class="text-2xl font-black text-slate-800 dark:text-white">-- mm</span>
+          </div>
+          <p id="kpi-mes-rain-max-date" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Fecha: --</p>
+        </div>
+
+        <!-- KPI: Racha Máx Viento -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-emerald-500">
+          <div class="flex items-center justify-between text-emerald-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Racha Máx</span>
+            <i data-feather="wind" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-mes-wind-max" class="text-2xl font-black text-slate-800 dark:text-white">-- km/h</span>
+          </div>
+          <p id="kpi-mes-wind-details" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Día: -- | Dir: --</p>
+        </div>
+
+      </div>
+
+      <!-- Gráficos del Mes -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Gráfico Temperaturas Diarias (Span 2 cols en desktop) -->
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="trending-up" class="text-red-500 h-4 w-4"></i> Evolución Térmica Diaria (°C)
+            </h3>
+            <span class="text-[11px] text-slate-400">Máx, Mín y Media</span>
+          </div>
+          <div class="h-72 w-full">
+            <canvas id="chartMensualTemp"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico Precipitaciones Diarias -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="bar-chart-2" class="text-sky-500 h-4 w-4"></i> Precipitaciones Diarias (mm)
+            </h3>
+            <span class="text-[11px] text-slate-400">Acumulado por día</span>
+          </div>
+          <div class="h-72 w-full">
+            <canvas id="chartMensualLluvia"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =============================================================== -->
+      <!-- HIETOGRAMA / MONITOREO DE LLUVIA, ET Y RADIACIÓN (downld08.txt) -->
+      <!-- =============================================================== -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm space-y-4 transition-colors">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-700/50 pb-3">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 mb-1 border border-sky-200 dark:border-sky-800">
+              <i data-feather="clock" class="h-3 w-3"></i> Monitoreo Agrometeorológico Continuo (8 Días)
+            </div>
+            <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <i data-feather="cloud-drizzle" class="text-sky-500 h-5 w-5"></i> Intensidad de Lluvia, Evapotranspiración (ET) y Radiación Solar
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Hietograma multivariable. Utiliza la barra inferior para zoom/desplazamiento.
+            </p>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-semibold self-start lg:self-auto">
+            <div class="bg-slate-50 dark:bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60">
+              <span class="text-slate-400 text-[10px] block uppercase">Lluvia Acum.</span>
+              <span id="hieto-kpi-cum" class="text-sky-600 dark:text-sky-400 font-bold text-sm">-- mm</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60">
+              <span class="text-slate-400 text-[10px] block uppercase">Pico Intensidad</span>
+              <span id="hieto-kpi-peak" class="text-red-500 font-bold text-sm">-- mm/h</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60">
+              <span class="text-slate-400 text-[10px] block uppercase">ET Acumulada</span>
+              <span id="hieto-kpi-et" class="text-emerald-500 font-bold text-sm">-- mm</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60">
+              <span class="text-slate-400 text-[10px] block uppercase">Máx Rad. Solar</span>
+              <span id="hieto-kpi-rad" class="text-amber-500 font-bold text-sm">-- W/m²</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenedor del Gráfico Plotly -->
+        <div id="chartHietograma" class="w-full h-[500px]"></div>
+      </div>
+
+      <!-- Gráfico de Viento Diario -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <i data-feather="wind" class="text-emerald-500 h-4 w-4"></i> Régimen de Viento Diario (km/h)
+          </h3>
+          <span class="text-[11px] text-slate-400">Velocidad media y ráfaga máxima</span>
+        </div>
+        <div class="h-60 w-full">
+          <canvas id="chartMensualViento"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabla Desplegable con Detalle Diario del Mes -->
+      <details class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm overflow-hidden">
+        <summary class="flex items-center justify-between p-4 cursor-pointer font-bold text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+          <span class="flex items-center gap-2">
+            <i data-feather="table" class="h-4 w-4 text-sky-500"></i> Ver Tabla de Datos Diarios del Mes
+          </span>
+          <i data-feather="chevron-down" class="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180"></i>
+        </summary>
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700/60 overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/60 uppercase font-semibold text-slate-400 text-[10px] tracking-wider">
+              <tr>
+                <th class="px-3 py-2">Día</th>
+                <th class="px-3 py-2">T. Media (°C)</th>
+                <th class="px-3 py-2">T. Máx (°C)</th>
+                <th class="px-3 py-2">Hora Máx</th>
+                <th class="px-3 py-2">T. Mín (°C)</th>
+                <th class="px-3 py-2">Hora Mín</th>
+                <th class="px-3 py-2">Lluvia (mm)</th>
+                <th class="px-3 py-2">ET (mm)</th>
+                <th class="px-3 py-2">Rad. Solar (W/m²)</th>
+                <th class="px-3 py-2">Viento Med (km/h)</th>
+                <th class="px-3 py-2">Ráfaga (km/h)</th>
+                <th class="px-3 py-2">Dir Dom</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-mes-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/40 font-mono">
+              <tr><td colspan="12" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- =============================================================== -->
+    <!-- SECCIÓN 2: AÑO EN CURSO (NOAAYR.TXT) -->
+    <!-- =============================================================== -->
+    <section id="seccion-anio" class="space-y-6 transition-all duration-300 pt-6">
+      
+      <!-- Encabezado Sección Año -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 mb-1 border border-amber-200 dark:border-amber-800">
+            <i data-feather="calendar" class="h-3.5 w-3.5"></i> Balance Agroclimático Anual
+          </div>
+          <h2 id="titulo-anio" class="text-2xl font-bold text-slate-800 dark:text-white">
+            Resumen Climatológico Anual
+          </h2>
+          <p id="subtitulo-anio" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Registro acumulado mes a mes durante el ciclo anual.
+          </p>
+        </div>
+
+        <span id="badge-meses-anio" class="text-xs px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-800 font-medium text-slate-600 dark:text-slate-300">
+          Cargando datos...
+        </span>
+      </div>
+
+      <!-- Tarjetas KPI del Año (Grid 6 elementos) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        
+        <!-- KPI Anual: Lluvia Total -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-sky-500">
+          <div class="flex items-center justify-between text-sky-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Lluvia Anual</span>
+            <i data-feather="cloud-rain" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-yr-rain-total" class="text-2xl font-black text-slate-800 dark:text-white">-- mm</span>
+          </div>
+          <p id="kpi-yr-rain-maxday" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Máx 24h: --</p>
+        </div>
+
+        <!-- KPI Anual: Temp Máxima Absoluta -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-red-500">
+          <div class="flex items-center justify-between text-red-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">T. Máxima Anual</span>
+            <i data-feather="thermometer" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-yr-tmax" class="text-2xl font-black text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p id="kpi-yr-tmax-date" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Mes: --</p>
+        </div>
+
+        <!-- KPI Anual: Temp Mínima Absoluta -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-blue-500">
+          <div class="flex items-center justify-between text-blue-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">T. Mínima Anual</span>
+            <i data-feather="thermometer" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-yr-tmin" class="text-2xl font-black text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p id="kpi-yr-tmin-date" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Mes: --</p>
+        </div>
+
+        <!-- KPI Anual: Temp Media Anual -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-amber-500">
+          <div class="flex items-center justify-between text-amber-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">T. Media Anual</span>
+            <i data-feather="thermometer" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-yr-tmean" class="text-2xl font-black text-slate-800 dark:text-white">-- °C</span>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Promedio anual</p>
+        </div>
+
+        <!-- KPI Anual: Días de Calor / Heladas -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-orange-500">
+          <div class="flex items-center justify-between text-orange-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Días ≥ 32°C / ≤ 0°C</span>
+            <i data-feather="sun" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2 flex items-baseline gap-1">
+            <span id="kpi-yr-days-heat" class="text-2xl font-black text-slate-800 dark:text-white">--</span>
+            <span class="text-xs text-slate-400">/</span>
+            <span id="kpi-yr-days-frost" class="text-lg font-bold text-sky-500">--</span>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Días calor / Heladas</p>
+        </div>
+
+        <!-- KPI Anual: Racha Máx Anual -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between border-l-4 border-l-emerald-500">
+          <div class="flex items-center justify-between text-emerald-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Racha Anual</span>
+            <i data-feather="wind" class="h-4 w-4"></i>
+          </div>
+          <div class="my-2">
+            <span id="kpi-yr-wind-max" class="text-2xl font-black text-slate-800 dark:text-white">-- km/h</span>
+          </div>
+          <p id="kpi-yr-wind-details" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Mes: -- | Dir: --</p>
+        </div>
+
+      </div>
+
+      <!-- Gráficos del Año -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Gráfico 1: Precipitaciones Mensuales Acumuladas -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="cloud-rain" class="text-sky-500 h-4 w-4"></i> Precipitaciones por Mes (mm) y Acumuladas
+            </h3>
+            <span class="text-[11px] text-slate-400">Barras + Línea Acumulativa</span>
+          </div>
+          <div class="h-72 w-full">
+            <canvas id="chartAnualLluvia"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Régimen Térmico Mensual -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+              <i data-feather="activity" class="text-amber-500 h-4 w-4"></i> Régimen Térmico Mensual (°C)
+            </h3>
+            <span class="text-[11px] text-slate-400">Media Máx, Media Mín y Medias</span>
+          </div>
+          <div class="h-72 w-full">
+            <canvas id="chartAnualTemp"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Gráfico 3: Vientos y Ráfagas por Mes -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <i data-feather="wind" class="text-emerald-500 h-4 w-4"></i> Viento Medio y Ráfagas Máximas por Mes (km/h)
+          </h3>
+          <span class="text-[11px] text-slate-400">Velocidad media y ráfaga máxima</span>
+        </div>
+        <div class="h-60 w-full">
+          <canvas id="chartAnualViento"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabla Climatológica Anual -->
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <i data-feather="calendar" class="h-4 w-4 text-amber-500"></i> Tabla Climatológica Anual Completa
+          </h3>
+          <span class="text-[11px] text-slate-400 font-medium">INTA EEA Salta (Cerrillos)</span>
+        </div>
+        <div class="overflow-x-auto p-4">
+          <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+            <thead class="bg-slate-50 dark:bg-slate-900/60 uppercase font-semibold text-slate-400 text-[10px] tracking-wider">
+              <tr>
+                <th class="px-3 py-2">Mes</th>
+                <th class="px-3 py-2">Med. Máx</th>
+                <th class="px-3 py-2">Med. Mín</th>
+                <th class="px-3 py-2">Media</th>
+                <th class="px-3 py-2">Extremo Alto</th>
+                <th class="px-3 py-2">Extremo Bajo</th>
+                <th class="px-3 py-2">Días ≥ 32°C</th>
+                <th class="px-3 py-2">Lluvia Total (mm)</th>
+                <th class="px-3 py-2">ET Total (mm)</th>
+                <th class="px-3 py-2">Rad. Solar Máx (W/m²)</th>
+                <th class="px-3 py-2">Máx Día (mm)</th>
+                <th class="px-3 py-2">Días Lluvia</th>
+                <th class="px-3 py-2">Viento Med</th>
+                <th class="px-3 py-2">Ráfaga Máx</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-anio-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/40 font-mono">
+              <tr><td colspan="14" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
+            </tbody>
+            <tfoot id="tabla-anio-tfoot" class="bg-slate-100 dark:bg-slate-900/80 font-bold text-slate-800 dark:text-white font-mono border-t-2 border-slate-300 dark:border-slate-700">
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700/60 py-8 mt-6 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <div class="flex justify-center items-center">
+        <a href="https://www.argentina.gob.ar/economia" target="_blank">
+          <img src="MECON-Agricultura-BLANCO.png" alt="Secretaría de Agricultura, Ganadería y Pesca" class="h-16 md:h-20 w-auto opacity-90 hover:opacity-100 transition">
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT: PARSING & CHARTS -->
+  <script>
+    // Inicializar Feather Icons
+    feather.replace();
+
+    // Mapeo de meses
+    const mesesMap = {
+      'JAN': 'Enero', 'FEB': 'Febrero', 'MAR': 'Marzo', 'APR': 'Abril',
+      'MAY': 'Mayo', 'JUN': 'Junio', 'JUL': 'Julio', 'AUG': 'Agosto',
+      'SEP': 'Septiembre', 'OCT': 'Octubre', 'NOV': 'Noviembre', 'DEC': 'Diciembre'
+    };
+    const mesesNombresArray = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+    // Control del Tema Oscuro / Claro
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+    function syncThemeIcons() {
+      if (document.documentElement.classList.contains('dark')) {
+        lightIcon.classList.remove('hidden');
+        darkIcon.classList.add('hidden');
+      } else {
+        darkIcon.classList.remove('hidden');
+        lightIcon.classList.add('hidden');
+      }
+      feather.replace();
+    }
+    syncThemeIcons();
+
+    themeToggleBtn.addEventListener('click', function() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+      syncThemeIcons();
+      actualizarTemaGraficos();
+    });
+
+    // Control de Pestañas
+    let vistaActual = 'mes';
+    function cambiarPestana(vista) {
+      vistaActual = vista;
+      const seccionMes = document.getElementById('seccion-mes');
+      const seccionAnio = document.getElementById('seccion-anio');
+      const btnMes = document.getElementById('tab-btn-mes');
+      const btnAnio = document.getElementById('tab-btn-anio');
+      const btnTodo = document.getElementById('tab-btn-todo');
+
+      // Clases de botón activo e inactivo
+      const activoClases = ['bg-sky-500', 'text-white', 'shadow-sm'];
+      const inactivoClases = ['text-blue-100', 'hover:text-white', 'hover:bg-white/10'];
+
+      [btnMes, btnAnio, btnTodo].forEach(b => {
+        b.classList.remove(...activoClases);
+        b.classList.add(...inactivoClases);
+      });
+
+      if (vista === 'mes') {
+        seccionMes.classList.remove('hidden');
+        seccionAnio.classList.add('hidden');
+        btnMes.classList.add(...activoClases);
+        btnMes.classList.remove(...inactivoClases);
+      } else if (vista === 'anio') {
+        seccionMes.classList.add('hidden');
+        seccionAnio.classList.remove('hidden');
+        btnAnio.classList.add(...activoClases);
+        btnAnio.classList.remove(...inactivoClases);
+      } else {
+        seccionMes.classList.remove('hidden');
+        seccionAnio.classList.remove('hidden');
+        btnTodo.classList.add(...activoClases);
+        btnTodo.classList.remove(...inactivoClases);
+      }
+      feather.replace();
+      setTimeout(() => {
+        if (window.Plotly && document.getElementById('chartHietograma')) {
+          Plotly.Plots.resize('chartHietograma');
+        }
+      }, 60);
+    }
+
+    // Instancias de Gráficos Chart.js
+    let chartMensualTemp = null;
+    let chartMensualLluvia = null;
+    let chartMensualViento = null;
+    let chartAnualLluvia = null;
+    let chartAnualTemp = null;
+    let chartAnualViento = null;
+    let dataHietogramaCache = null;
+
+    function getChartThemeColors() {
+      const isDark = document.documentElement.classList.contains('dark');
+      return {
+        textColor: isDark ? '#94a3b8' : '#64748b',
+        gridColor: isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.06)'
+      };
+    }
+
+    function actualizarTemaGraficos() {
+      const { textColor, gridColor } = getChartThemeColors();
+      const graficos = [chartMensualTemp, chartMensualLluvia, chartMensualViento, chartAnualLluvia, chartAnualTemp, chartAnualViento];
+      graficos.forEach(ch => {
+        if (!ch) return;
+        if (ch.options.scales.x) {
+          ch.options.scales.x.ticks.color = textColor;
+          ch.options.scales.x.grid.color = gridColor;
+        }
+        if (ch.options.scales.y) {
+          ch.options.scales.y.ticks.color = textColor;
+          ch.options.scales.y.grid.color = gridColor;
+        }
+        if (ch.options.scales.y1) {
+          ch.options.scales.y1.ticks.color = textColor;
+          ch.options.scales.y1.grid.color = gridColor;
+        }
+        if (ch.options.plugins && ch.options.plugins.legend) {
+          ch.options.plugins.legend.labels.color = textColor;
+        }
+        ch.update();
+      });
+
+      actualizarTemaHietograma();
+    }
+
+    // =========================================================================
+    // PARSER & RENDER: downld08.txt (Hietograma, ET, Rad. Solar 8 Días)
+    // =========================================================================
+    function parseDownld08(text) {
+      const lines = text.split(/\r?\n/);
+      const timeX = [];
+      const intensityY = [];
+      const cumRainY = [];
+      const solarRadY = [];
+      const etY = [];
+      const cumEtY = [];
+      
+      let currentCum = 0;
+      let currentEtCum = 0;
+      let maxRate = 0;
+      let maxRateTime = '--';
+      let maxSolar = 0;
+      let maxSolarTime = '--';
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line || !line.includes('/')) continue;
+        if (line.includes('----------------') || line.includes('Date') || line.includes('Temp')) continue;
+
+        const dateStr = line.substring(0, 10).trim();
+        const timeStr = line.substring(10, 17).trim();
+        
+        const dateParts = dateStr.split('/');
+        if (dateParts.length !== 3) continue;
+
+        const [d, m, y] = dateParts.map(Number);
+        if (isNaN(d) || isNaN(m) || isNaN(y)) continue;
+
+        const timeParts = timeStr.split(':');
+        if (timeParts.length < 2) continue;
+        const [hh, mm] = timeParts.map(Number);
+        if (isNaN(hh) || isNaN(mm)) continue;
+
+        const pad = (n) => String(n).padStart(2, '0');
+        const fullYear = 2000 + y;
+        const isoDate = `${fullYear}-${pad(m)}-${pad(d)} ${pad(hh)}:${pad(mm)}:00`;
+
+        const rain = parseFloat(line.substring(117, 124).trim()) || 0;
+        const rate = parseFloat(line.substring(124, 131).trim()) || 0;
+        const solar = parseFloat(line.substring(131, 138).trim()) || 0;
+        const et = parseFloat(line.substring(210, 218).trim()) || 0;
+
+        currentCum += rain;
+        currentEtCum += et;
+
+        if (rate > maxRate) {
+          maxRate = rate;
+          maxRateTime = `${pad(d)}/${pad(m)} ${pad(hh)}:${pad(mm)}`;
+        }
+
+        if (solar > maxSolar) {
+          maxSolar = solar;
+          maxSolarTime = `${pad(d)}/${pad(m)} ${pad(hh)}:${pad(mm)}`;
+        }
+
+        timeX.push(isoDate);
+        intensityY.push(rate);
+        cumRainY.push(parseFloat(currentCum.toFixed(2)));
+        solarRadY.push(solar);
+        etY.push(et);
+        cumEtY.push(parseFloat(currentEtCum.toFixed(2)));
+      }
+
+      // Actualizar KPIs de la tarjeta
+      const kpiCum = document.getElementById('hieto-kpi-cum');
+      const kpiPeak = document.getElementById('hieto-kpi-peak');
+      const kpiEt = document.getElementById('hieto-kpi-et');
+      const kpiRad = document.getElementById('hieto-kpi-rad');
+
+      if (kpiCum) kpiCum.innerText = `${currentCum.toFixed(1)} mm`;
+      if (kpiPeak) {
+        kpiPeak.innerText = maxRate > 0 ? `${maxRate.toFixed(1)} mm/h (${maxRateTime})` : '0.0 mm/h';
+      }
+      if (kpiEt) kpiEt.innerText = `${currentEtCum.toFixed(2)} mm`;
+      if (kpiRad) {
+        kpiRad.innerText = maxSolar > 0 ? `${maxSolar.toFixed(0)} W/m²` : '0 W/m²';
+      }
+
+      return {
+        timeX,
+        intensityY,
+        cumRainY,
+        solarRadY,
+        etY,
+        cumEtY,
+        totalCum: parseFloat(currentCum.toFixed(2)),
+        totalEt: parseFloat(currentEtCum.toFixed(2)),
+        maxRate,
+        maxRateTime,
+        maxSolar
+      };
+    }
+
+    function renderHietograma(data) {
+      if (!data || !data.timeX || data.timeX.length === 0) return;
+      dataHietogramaCache = data;
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+      const btnBg = isDark ? '#1e293b' : '#f1f5f9';
+      const btnActive = '#0284c7';
+
+      const traceIntensity = {
+        x: data.timeX,
+        y: data.intensityY,
+        name: 'Intensidad Lluvia (mm/h)',
+        type: 'bar',
+        marker: { color: '#0284c7', opacity: 0.8 },
+        hovertemplate: '%{x}<br><b>Intensidad:</b> %{y:.1f} mm/h<extra></extra>'
+      };
+
+      const traceCum = {
+        x: data.timeX,
+        y: data.cumRainY,
+        name: 'Lluvia Acum. (mm)',
+        type: 'scatter',
+        mode: 'lines',
+        yaxis: 'y2',
+        line: { color: '#f43f5e', width: 2.5 },
+        hovertemplate: '%{x}<br><b>Lluvia Acum:</b> %{y:.2f} mm<extra></extra>'
+      };
+
+      const traceSolar = {
+        x: data.timeX,
+        y: data.solarRadY,
+        name: 'Rad. Solar (W/m²)',
+        type: 'scatter',
+        mode: 'lines',
+        yaxis: 'y3',
+        visible: 'legendonly',
+        line: { color: '#f59e0b', width: 1.5 },
+        hovertemplate: '%{x}<br><b>Rad. Solar:</b> %{y:.0f} W/m²<extra></extra>'
+      };
+
+      const traceET = {
+        x: data.timeX,
+        y: data.cumEtY,
+        name: 'ET Acumulada (mm)',
+        type: 'scatter',
+        mode: 'lines',
+        yaxis: 'y2',
+        line: { color: '#10b981', width: 2, dash: 'dot' },
+        hovertemplate: '%{x}<br><b>ET Acum:</b> %{y:.2f} mm<extra></extra>'
+      };
+
+      const layout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { family: 'Inter, sans-serif', color: textColor, size: 11 },
+        margin: { l: 55, r: 55, t: 30, b: 40 },
+        hovermode: 'x unified',
+        legend: {
+          orientation: 'h',
+          y: 1.15,
+          x: 0.05,
+          font: { color: textColor }
+        },
+        xaxis: {
+          type: 'date',
+          tickformat: '%d %b %H:%M',
+          gridcolor: gridColor,
+          tickfont: { color: textColor, size: 10 },
+          rangeslider: {
+            visible: true,
+            thickness: 0.07,
+            bgcolor: isDark ? '#0f172a' : '#f8fafc',
+            bordercolor: isDark ? '#334155' : '#cbd5e1'
+          },
+          rangeselector: {
+            buttons: [
+              { step: 'day', count: 1, label: '1 día', stepmode: 'backward' },
+              { step: 'day', count: 3, label: '3 días', stepmode: 'backward' },
+              { step: 'all', label: '8 días (Todo)' }
+            ],
+            bgcolor: btnBg,
+            activecolor: btnActive,
+            font: { color: textColor, size: 10 }
+          }
+        },
+        yaxis: {
+          title: { text: 'Lluvia (mm/h)', font: { color: '#0284c7', size: 11 } },
+          tickfont: { color: '#0284c7', size: 10 },
+          gridcolor: gridColor,
+          rangemode: 'tozero'
+        },
+        yaxis2: {
+          title: { text: 'Acumulado (mm)', font: { color: '#f43f5e', size: 11 } },
+          tickfont: { color: '#f43f5e', size: 10 },
+          overlaying: 'y',
+          side: 'right',
+          showgrid: false,
+          rangemode: 'tozero'
+        },
+        yaxis3: {
+          title: { text: 'Solar (W/m²)', font: { color: '#f59e0b', size: 11 } },
+          tickfont: { color: '#f59e0b', size: 10 },
+          overlaying: 'y',
+          side: 'right',
+          position: 0.95,
+          showgrid: false,
+          visible: false
+        }
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d']
+      };
+
+      Plotly.react('chartHietograma', [traceIntensity, traceCum, traceET, traceSolar], layout, config);
+    }
+
+    function actualizarTemaHietograma() {
+      if (dataHietogramaCache && window.Plotly) {
+        renderHietograma(dataHietogramaCache);
+      }
+    }
+
+    // =========================================================================
+    // PARSER: NOAAMO.TXT (Mensual)
+    // =========================================================================
+    function parseNOAAMensual(text, dlData) {
+      const lines = text.split(/\r?\n/);
+      let mesNombre = "Mes en Curso";
+      let anio = "";
+
+      for (const line of lines.slice(0, 10)) {
+        const headerMatch = line.match(/for\s+([A-Z]{3,4})\.?\s+(\d{4})/i);
+        if (headerMatch) {
+          const cod = headerMatch[1].toUpperCase();
+          anio = headerMatch[2];
+          mesNombre = mesesMap[cod] || cod;
+          document.getElementById('titulo-mes').innerText = `Resumen Climatológico Mensual - ${mesNombre} ${anio}`;
+          break;
+        }
+      }
+
+      let startIdx = -1, endIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('----------------------------------------------------')) {
+          if (startIdx === -1) startIdx = i;
+          else { endIdx = i; break; }
+        }
+      }
+
+      const dias = [];
+      const tempMax = [], tempMin = [], tempMean = [];
+      const rain = [];
+      const windAvg = [], windHigh = [], windDir = [];
+      const rowsTable = [];
+
+      let maxTemp = -99, maxTempDay = '--', maxTempTime = '--';
+      let minTemp = 99, minTempDay = '--', minTempTime = '--';
+      let maxRain = 0, maxRainDay = '--';
+      let sumRain = 0;
+      let rainDaysCount = 0;
+      let maxWind = 0, maxWindDay = '--', maxWindTime = '--', maxWindDir = '--';
+      let sumMeanTemp = 0;
+
+      if (startIdx !== -1 && endIdx !== -1) {
+        for (let i = startIdx + 1; i < endIdx; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const parts = line.split(/\s+/);
+          
+          if (parts.length >= 11 && !isNaN(parts[0])) {
+            const day = parseInt(parts[0], 10);
+            const tMean = parseFloat(parts[1]);
+            const tMax = parseFloat(parts[2]);
+            const tMaxTime = parts[3] || '--';
+            const tMin = parseFloat(parts[4]);
+            const tMinTime = parts[5] || '--';
+            const pRain = parseFloat(parts[8]) || 0;
+            const wAvg = parseFloat(parts[9]) || 0;
+            const wHigh = parseFloat(parts[10]) || 0;
+            const wTime = parts[11] || '--';
+            const wDir = parts[12] || '--';
+
+            let dayEt = '--';
+            let daySolar = '--';
+
+            // Mapear valores de ET y Radiación desde downld08 si coinciden los días
+            if (dlData && dlData.timeX) {
+              let etSumDay = 0;
+              let solarMaxDay = 0;
+              let foundDl = false;
+
+              for (let k = 0; k < dlData.timeX.length; k++) {
+                const dateObj = new Date(dlData.timeX[k]);
+                if (dateObj.getDate() === day) {
+                  foundDl = true;
+                  etSumDay += dlData.etY[k] || 0;
+                  if (dlData.solarRadY[k] > solarMaxDay) {
+                    solarMaxDay = dlData.solarRadY[k];
+                  }
+                }
+              }
+
+              if (foundDl) {
+                dayEt = etSumDay.toFixed(2);
+                daySolar = solarMaxDay.toFixed(0);
+              }
+            }
+
+            dias.push(`Día ${day}`);
+            tempMean.push(tMean);
+            tempMax.push(tMax);
+            tempMin.push(tMin);
+            rain.push(pRain);
+            windAvg.push(wAvg);
+            windHigh.push(wHigh);
+            windDir.push(wDir);
+
+            sumMeanTemp += tMean;
+            sumRain += pRain;
+            if (pRain > 0.2) rainDaysCount++;
+
+            if (tMax > maxTemp) {
+              maxTemp = tMax;
+              maxTempDay = day;
+              maxTempTime = tMaxTime;
+            }
+            if (tMin < minTemp) {
+              minTemp = tMin;
+              minTempDay = day;
+              minTempTime = tMinTime;
+            }
+            if (pRain > maxRain) {
+              maxRain = pRain;
+              maxRainDay = day;
+            }
+            if (wHigh > maxWind) {
+              maxWind = wHigh;
+              maxWindDay = day;
+              maxWindTime = wTime;
+              maxWindDir = wDir;
+            }
+
+            rowsTable.push({
+              day, tMean, tMax, tMaxTime, tMin, tMinTime, pRain, dayEt, daySolar, wAvg, wHigh, wDir
+            });
+          }
+        }
+      }
+
+      const maxRainMatch = text.match(/Max Rain:\s*([\d.]+)\s*ON\s*([^\r\n]+)/i);
+      let maxRainDateStr = maxRain > 0 ? `Día ${maxRainDay}` : 'Sin lluvia';
+      if (maxRainMatch) maxRainDateStr = maxRainMatch[2].trim();
+
+      const daysRainMatch = text.match(/Days of Rain:\s*(\d+)/i);
+      if (daysRainMatch) rainDaysCount = parseInt(daysRainMatch[1], 10);
+
+      document.getElementById('badge-dias-mes').innerText = `${dias.length} días registrados`;
+
+      document.getElementById('kpi-mes-tmax').innerText = maxTemp !== -99 ? `${maxTemp.toFixed(1)} °C` : '-- °C';
+      document.getElementById('kpi-mes-tmax-date').innerText = `Día ${maxTempDay} (${maxTempTime} hs)`;
+
+      document.getElementById('kpi-mes-tmin').innerText = minTemp !== 99 ? `${minTemp.toFixed(1)} °C` : '-- °C';
+      document.getElementById('kpi-mes-tmin-date').innerText = `Día ${minTempDay} (${minTempTime} hs)`;
+
+      const tMediaPeriodo = dias.length > 0 ? (sumMeanTemp / dias.length).toFixed(1) : '--';
+      document.getElementById('kpi-mes-tmean').innerText = `${tMediaPeriodo} °C`;
+
+      document.getElementById('kpi-mes-rain-total').innerText = `${sumRain.toFixed(1)} mm`;
+      document.getElementById('kpi-mes-rain-days').innerText = `${rainDaysCount} días con lluvia`;
+
+      document.getElementById('kpi-mes-rain-max').innerText = `${maxRain.toFixed(1)} mm`;
+      document.getElementById('kpi-mes-rain-max-date').innerText = maxRainDateStr;
+
+      document.getElementById('kpi-mes-wind-max').innerText = `${maxWind.toFixed(1)} km/h`;
+      document.getElementById('kpi-mes-wind-details').innerText = `Día ${maxWindDay} (${maxWindTime} hs) | Dir: ${maxWindDir}`;
+
+      const tbody = document.getElementById('tabla-mes-tbody');
+      if (rowsTable.length > 0) {
+        tbody.innerHTML = rowsTable.map(r => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+            <td class="px-3 py-1.5 font-bold text-slate-800 dark:text-white">Día ${r.day}</td>
+            <td class="px-3 py-1.5">${r.tMean.toFixed(1)}</td>
+            <td class="px-3 py-1.5 text-red-500 font-semibold">${r.tMax.toFixed(1)}</td>
+            <td class="px-3 py-1.5 text-slate-400 text-[11px]">${r.tMaxTime}</td>
+            <td class="px-3 py-1.5 text-blue-500 font-semibold">${r.tMin.toFixed(1)}</td>
+            <td class="px-3 py-1.5 text-slate-400 text-[11px]">${r.tMinTime}</td>
+            <td class="px-3 py-1.5 ${r.pRain > 0 ? 'text-sky-500 font-bold' : 'text-slate-400'}">${r.pRain.toFixed(1)}</td>
+            <td class="px-3 py-1.5 text-emerald-500 font-semibold">${r.dayEt}</td>
+            <td class="px-3 py-1.5 text-amber-500 font-semibold">${r.daySolar}</td>
+            <td class="px-3 py-1.5">${r.wAvg.toFixed(1)}</td>
+            <td class="px-3 py-1.5 text-emerald-500">${r.wHigh.toFixed(1)}</td>
+            <td class="px-3 py-1.5"><span class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px]">${r.wDir}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      return { dias, tempMean, tempMax, tempMin, rain, windAvg, windHigh };
+    }
+
+    // =========================================================================
+    // PARSER: NOAAYR.TXT (Anual)
+    // =========================================================================
+    function parseNOAAAnual(text) {
+      const lines = text.split(/\r?\n/);
+      
+      let idxTempStart = -1, idxTempEnd = -1;
+      let idxRainStart = -1, idxRainEnd = -1;
+      let idxWindStart = -1, idxWindEnd = -1;
+
+      for (let i = 0; i < lines.length; i++) {
+        const l = lines[i];
+        if (l.includes('TEMPERATURE (') && idxTempStart === -1) {
+          for (let j = i; j < lines.length; j++) {
+            if (lines[j].includes('----------------------------------------------------')) {
+              if (idxTempStart === -1) idxTempStart = j;
+              else { idxTempEnd = j; break; }
+            }
+          }
+        }
+        if (l.includes('PRECIPITATION (') && idxRainStart === -1) {
+          for (let j = i; j < lines.length; j++) {
+            if (lines[j].includes('---------------------------------------------')) {
+              if (idxRainStart === -1) idxRainStart = j;
+              else { idxRainEnd = j; break; }
+            }
+          }
+        }
+        if (l.includes('WIND SPEED (') && idxWindStart === -1) {
+          for (let j = i; j < lines.length; j++) {
+            if (lines[j].includes('---------------------------------')) {
+              if (idxWindStart === -1) idxWindStart = j;
+              else { idxWindEnd = j; break; }
+            }
+          }
+        }
+      }
+
+      const meses = [];
+      const mesesData = {};
+
+      if (idxTempStart !== -1 && idxTempEnd !== -1) {
+        for (let i = idxTempStart + 1; i < idxTempEnd; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const p = line.split(/\s+/);
+          if (p.length >= 12 && !isNaN(p[1])) {
+            const mNum = parseInt(p[1], 10);
+            mesesData[mNum] = {
+              mNum,
+              mName: mesesNombresArray[mNum - 1] || `M${mNum}`,
+              meanMax: parseFloat(p[2]),
+              meanMin: parseFloat(p[3]),
+              mean: parseFloat(p[4]),
+              hi: parseFloat(p[8]),
+              hiDate: p[9] || '',
+              low: parseFloat(p[10]),
+              lowDate: p[11] || '',
+              daysHeat: parseInt(p[12], 10) || 0,
+              daysFrost: parseInt(p[14], 10) || 0,
+              rainTotal: 0,
+              etTotal: 0,
+              solarMax: 0,
+              rainMaxDay: 0,
+              rainMaxDate: '--',
+              rainDays: 0,
+              windAvg: 0,
+              windHi: 0,
+              windHiDate: '--',
+              windDomDir: '--'
+            };
+            if (!meses.includes(mNum)) meses.push(mNum);
+          }
+        }
+      }
+
+      let totMeanMax = '--', totMeanMin = '--', totMean = '--';
+      let totHi = '--', totHiMonth = '--', totLow = '--', totLowMonth = '--';
+      let totDaysHeat = 0, totDaysFrost = 0;
+
+      if (idxTempEnd !== -1 && idxTempEnd + 1 < lines.length) {
+        const totLine = lines[idxTempEnd + 1].trim();
+        const tp = totLine.split(/\s+/);
+        if (tp.length >= 10) {
+          totMeanMax = tp[0];
+          totMeanMin = tp[1];
+          totMean = tp[2];
+          totHi = tp[6];
+          totHiMonth = tp[7];
+          totLow = tp[8];
+          totLowMonth = tp[9];
+          totDaysHeat = parseInt(tp[10], 10) || 0;
+          totDaysFrost = parseInt(tp[12], 10) || 0;
+        }
+      }
+
+      let totRainAnnual = 0;
+      let totRainMaxDay = '--', totRainMaxMonth = '--';
+      let totRainDays = 0;
+
+      if (idxRainStart !== -1 && idxRainEnd !== -1) {
+        for (let i = idxRainStart + 1; i < idxRainEnd; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const p = line.split(/\s+/);
+          if (p.length >= 6 && !isNaN(p[1])) {
+            const mNum = parseInt(p[1], 10);
+            if (mesesData[mNum]) {
+              mesesData[mNum].rainTotal = parseFloat(p[2]) || 0;
+              mesesData[mNum].rainMaxDay = parseFloat(p[4]) || 0;
+              mesesData[mNum].rainMaxDate = p[5] || '--';
+              mesesData[mNum].rainDays = parseInt(p[6], 10) || 0;
+            }
+          }
+        }
+        if (idxRainEnd + 1 < lines.length) {
+          const rTotLine = lines[idxRainEnd + 1].trim();
+          const rp = rTotLine.split(/\s+/);
+          if (rp.length >= 5) {
+            totRainAnnual = parseFloat(rp[0]) || 0;
+            totRainMaxDay = rp[2];
+            totRainMaxMonth = rp[3];
+            totRainDays = parseInt(rp[4], 10) || 0;
+          }
+        }
+      }
+
+      let totWindAvg = '--', totWindHi = '--', totWindHiMonth = '--', totWindDir = '--';
+      if (idxWindStart !== -1 && idxWindEnd !== -1) {
+        for (let i = idxWindStart + 1; i < idxWindEnd; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const p = line.split(/\s+/);
+          if (p.length >= 6 && !isNaN(p[1])) {
+            const mNum = parseInt(p[1], 10);
+            if (mesesData[mNum]) {
+              mesesData[mNum].windAvg = parseFloat(p[2]) || 0;
+              mesesData[mNum].windHi = parseFloat(p[3]) || 0;
+              mesesData[mNum].windHiDate = p[4] || '--';
+              mesesData[mNum].windDomDir = p[5] || '--';
+            }
+          }
+        }
+        if (idxWindEnd + 1 < lines.length) {
+          const wTotLine = lines[idxWindEnd + 1].trim();
+          const wp = wTotLine.split(/\s+/);
+          if (wp.length >= 4) {
+            totWindAvg = wp[0];
+            totWindHi = wp[1];
+            totWindHiMonth = wp[2];
+            totWindDir = wp[3];
+          }
+        }
+      }
+
+      meses.sort((a, b) => a - b);
+      const labels = [];
+      const meanMaxArr = [], meanMinArr = [], meanArr = [];
+      const hiArr = [], lowArr = [];
+      const rainArr = [];
+      const rainAccumArr = [];
+      const windAvgArr = [], windHiArr = [];
+      let runningRain = 0;
+
+      meses.forEach(m => {
+        const item = mesesData[m];
+        labels.push(item.mName);
+        meanMaxArr.push(item.meanMax);
+        meanMinArr.push(item.meanMin);
+        meanArr.push(item.mean);
+        hiArr.push(item.hi);
+        lowArr.push(item.low);
+        rainArr.push(item.rainTotal);
+        runningRain += item.rainTotal;
+        rainAccumArr.push(parseFloat(runningRain.toFixed(1)));
+        windAvgArr.push(item.windAvg);
+        windHiArr.push(item.windHi);
+      });
+
+      document.getElementById('badge-meses-anio').innerText = `${meses.length} meses registrados`;
+
+      document.getElementById('kpi-yr-rain-total').innerText = `${totRainAnnual.toFixed(1)} mm`;
+      document.getElementById('kpi-yr-rain-maxday').innerText = `Máx 24h: ${totRainMaxDay} mm (${totRainMaxMonth})`;
+
+      document.getElementById('kpi-yr-tmax').innerText = `${totHi} °C`;
+      document.getElementById('kpi-yr-tmax-date').innerText = `Mes: ${mesesMap[totHiMonth] || totHiMonth}`;
+
+      document.getElementById('kpi-yr-tmin').innerText = `${totLow} °C`;
+      document.getElementById('kpi-yr-tmin-date').innerText = `Mes: ${mesesMap[totLowMonth] || totLowMonth}`;
+
+      document.getElementById('kpi-yr-tmean').innerText = `${totMean} °C`;
+
+      document.getElementById('kpi-yr-days-heat').innerText = `${totDaysHeat}`;
+      document.getElementById('kpi-yr-days-frost').innerText = `${totDaysFrost}`;
+
+      document.getElementById('kpi-yr-wind-max').innerText = `${totWindHi} km/h`;
+      document.getElementById('kpi-yr-wind-details').innerText = `Mes: ${mesesMap[totWindHiMonth] || totWindHiMonth} | Dir: ${totWindDir}`;
+
+      const tbodyAnio = document.getElementById('tabla-anio-tbody');
+      tbodyAnio.innerHTML = meses.map(m => {
+        const r = mesesData[m];
+        return `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+            <td class="px-3 py-2 font-bold text-slate-800 dark:text-white">${r.mName}</td>
+            <td class="px-3 py-2 text-amber-500 font-semibold">${r.meanMax.toFixed(1)}</td>
+            <td class="px-3 py-2 text-sky-400 font-semibold">${r.meanMin.toFixed(1)}</td>
+            <td class="px-3 py-2 font-medium">${r.mean.toFixed(1)}</td>
+            <td class="px-3 py-2 text-red-500 font-bold">${r.hi.toFixed(1)} <span class="text-[10px] text-slate-400 font-normal">(${r.hiDate})</span></td>
+            <td class="px-3 py-2 text-blue-500 font-bold">${r.low.toFixed(1)} <span class="text-[10px] text-slate-400 font-normal">(${r.lowDate})</span></td>
+            <td class="px-3 py-2 ${r.daysHeat > 0 ? 'text-orange-500 font-bold' : 'text-slate-400'}">${r.daysHeat}</td>
+            <td class="px-3 py-2 font-bold ${r.rainTotal > 0 ? 'text-sky-500' : 'text-slate-400'}">${r.rainTotal.toFixed(1)}</td>
+            <td class="px-3 py-2 text-emerald-500 font-semibold">${r.etTotal > 0 ? r.etTotal.toFixed(1) : '--'}</td>
+            <td class="px-3 py-2 text-amber-500 font-semibold">${r.solarMax > 0 ? r.solarMax.toFixed(0) : '--'}</td>
+            <td class="px-3 py-2">${r.rainMaxDay.toFixed(1)} <span class="text-[10px] text-slate-400">(${r.rainMaxDate})</span></td>
+            <td class="px-3 py-2">${r.rainDays}</td>
+            <td class="px-3 py-2">${r.windAvg.toFixed(1)}</td>
+            <td class="px-3 py-2 text-emerald-500 font-semibold">${r.windHi.toFixed(1)} <span class="text-[10px] text-slate-400">(${r.windDomDir})</span></td>
+          </tr>
+        `;
+      }).join('');
+
+      const tfootAnio = document.getElementById('tabla-anio-tfoot');
+      tfootAnio.innerHTML = `
+        <tr>
+          <td class="px-3 py-2 text-sky-600 dark:text-sky-400 uppercase">ANUAL / MEDIAS</td>
+          <td class="px-3 py-2 text-amber-500">${totMeanMax}</td>
+          <td class="px-3 py-2 text-sky-400">${totMeanMin}</td>
+          <td class="px-3 py-2">${totMean}</td>
+          <td class="px-3 py-2 text-red-500 font-black">${totHi} (${totHiMonth})</td>
+          <td class="px-3 py-2 text-blue-500 font-black">${totLow} (${totLowMonth})</td>
+          <td class="px-3 py-2 text-orange-500">${totDaysHeat}</td>
+          <td class="px-3 py-2 text-sky-500 font-black">${totRainAnnual.toFixed(1)}</td>
+          <td class="px-3 py-2 text-emerald-500 font-black">--</td>
+          <td class="px-3 py-2 text-amber-500 font-black">--</td>
+          <td class="px-3 py-2">${totRainMaxDay} (${totRainMaxMonth})</td>
+          <td class="px-3 py-2">${totRainDays}</td>
+          <td class="px-3 py-2">${totWindAvg}</td>
+          <td class="px-3 py-2 text-emerald-500 font-black">${totWindHi} (${totWindHiMonth})</td>
+        </tr>
+      `;
+
+      return {
+        labels, meanMaxArr, meanMinArr, meanArr, hiArr, lowArr,
+        rainArr, rainAccumArr, windAvgArr, windHiArr
+      };
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE GRÁFICOS (Chart.js)
+    // =========================================================================
+    function renderGraficosMes(data) {
+      const { textColor, gridColor } = getChartThemeColors();
+
+      const ctxT = document.getElementById('chartMensualTemp').getContext('2d');
+      if (chartMensualTemp) chartMensualTemp.destroy();
+      chartMensualTemp = new Chart(ctxT, {
+        type: 'line',
+        data: {
+          labels: data.dias,
+          datasets: [
+            {
+              label: 'Temp. Máxima (°C)',
+              data: data.tempMax,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 2.5
+            },
+            {
+              label: 'Temp. Media (°C)',
+              data: data.tempMean,
+              borderColor: '#f59e0b',
+              backgroundColor: 'transparent',
+              borderWidth: 1.5,
+              borderDash: [4, 4],
+              tension: 0.3,
+              pointRadius: 0
+            },
+            {
+              label: 'Temp. Mínima (°C)',
+              data: data.tempMin,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.15)',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 2.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { ticks: { color: textColor, maxRotation: 45, font: { size: 10 } }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+          }
+        }
+      });
+
+      const ctxR = document.getElementById('chartMensualLluvia').getContext('2d');
+      if (chartMensualLluvia) chartMensualLluvia.destroy();
+      chartMensualLluvia = new Chart(ctxR, {
+        type: 'bar',
+        data: {
+          labels: data.dias,
+          datasets: [{
+            label: 'Precipitación (mm)',
+            data: data.rain,
+            backgroundColor: '#0284c7',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } }
+          },
+          scales: {
+            x: { ticks: { color: textColor, maxRotation: 45, font: { size: 10 } }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true }
+          }
+        }
+      });
+
+      const ctxW = document.getElementById('chartMensualViento').getContext('2d');
+      if (chartMensualViento) chartMensualViento.destroy();
+      chartMensualViento = new Chart(ctxW, {
+        type: 'line',
+        data: {
+          labels: data.dias,
+          datasets: [
+            {
+              label: 'Ráfaga Máx. (km/h)',
+              data: data.windHigh,
+              borderColor: '#8b5cf6',
+              backgroundColor: 'rgba(139, 92, 246, 0.15)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true,
+              pointRadius: 2.5
+            },
+            {
+              label: 'Velocidad Media (km/h)',
+              data: data.windAvg,
+              borderColor: '#0d9488',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              tension: 0.3,
+              pointRadius: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { ticks: { color: textColor, maxRotation: 45, font: { size: 10 } }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function renderGraficosAnio(data) {
+      const { textColor, gridColor } = getChartThemeColors();
+
+      const ctxYR = document.getElementById('chartAnualLluvia').getContext('2d');
+      if (chartAnualLluvia) chartAnualLluvia.destroy();
+      chartAnualLluvia = new Chart(ctxYR, {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Acumulado Anual (mm)',
+              data: data.rainAccumArr,
+              borderColor: '#6366f1',
+              backgroundColor: 'transparent',
+              borderWidth: 3,
+              tension: 0.25,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#ffffff',
+              pointBorderColor: '#6366f1',
+              pointBorderWidth: 2,
+              yAxisID: 'y1',
+              order: 1
+            },
+            {
+              type: 'bar',
+              label: 'Lluvia Mensual (mm)',
+              data: data.rainArr,
+              backgroundColor: '#0ea5e9',
+              borderRadius: 6,
+              yAxisID: 'y',
+              order: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } },
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              ticks: { color: textColor, font: { size: 10 } },
+              grid: { color: gridColor },
+              title: { display: true, text: 'Mensual (mm)', color: textColor, font: { size: 10 } },
+              beginAtZero: true
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              ticks: { color: '#6366f1', font: { size: 10 } },
+              grid: { drawOnChartArea: false },
+              title: { display: true, text: 'Acumulado (mm)', color: '#6366f1', font: { size: 10 } },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      const ctxYT = document.getElementById('chartAnualTemp').getContext('2d');
+      if (chartAnualTemp) chartAnualTemp.destroy();
+      chartAnualTemp = new Chart(ctxYT, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: 'Media Temp. Máx (°C)',
+              data: data.meanMaxArr,
+              borderColor: '#f97316',
+              backgroundColor: 'rgba(249, 115, 22, 0.15)',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 3
+            },
+            {
+              label: 'Temp. Media (°C)',
+              data: data.meanArr,
+              borderColor: '#eab308',
+              backgroundColor: 'transparent',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              tension: 0.3,
+              pointRadius: 2
+            },
+            {
+              label: 'Media Temp. Mín (°C)',
+              data: data.meanMinArr,
+              borderColor: '#06b6d4',
+              backgroundColor: 'rgba(6, 182, 212, 0.15)',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+          }
+        }
+      });
+
+      const ctxYW = document.getElementById('chartAnualViento').getContext('2d');
+      if (chartAnualViento) chartAnualViento.destroy();
+      chartAnualViento = new Chart(ctxYW, {
+        type: 'bar',
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: 'Ráfaga Máxima (km/h)',
+              data: data.windHiArr,
+              backgroundColor: '#8b5cf6',
+              borderRadius: 5
+            },
+            {
+              label: 'Velocidad Media (km/h)',
+              data: data.windAvgArr,
+              backgroundColor: '#0d9488',
+              borderRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: textColor, font: { size: 11 } } },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // CARGA DE REPORTES ASÍNCRONA
+    // =========================================================================
+    async function cargarReportes() {
+      const iconRefresh = document.getElementById('icon-refresh');
+      if (iconRefresh) iconRefresh.classList.add('animate-spin');
+
+      let dlData = null;
+
+      try {
+        // 1. Cargar Hietograma / Registro 8 Días (downld08.txt) primero para nutrir las tablas
+        try {
+          let resDl = await fetch('downld08.txt?t=' + new Date().getTime());
+          if (!resDl.ok) {
+            resDl = await fetch('../downld08.txt?t=' + new Date().getTime());
+          }
+          if (resDl.ok) {
+            const textDl = await resDl.text();
+            dlData = parseDownld08(textDl);
+            renderHietograma(dlData);
+          } else {
+            console.warn("No se pudo cargar downld08.txt:", resDl.status);
+          }
+        } catch (eDl) {
+          console.warn("Error al cargar downld08.txt:", eDl);
+        }
+
+        // 2. Cargar Reporte Mensual
+        const resMo = await fetch('NOAAMO.TXT?t=' + new Date().getTime());
+        if (resMo.ok) {
+          const textMo = await resMo.text();
+          const dataMo = parseNOAAMensual(textMo, dlData);
+          renderGraficosMes(dataMo);
+        } else {
+          console.warn("No se pudo cargar NOAAMO.TXT:", resMo.status);
+        }
+
+        // 3. Cargar Reporte Anual
+        const resYr = await fetch('NOAAYR.TXT?t=' + new Date().getTime());
+        if (resYr.ok) {
+          const textYr = await resYr.text();
+          const dataYr = parseNOAAAnual(textYr);
+          renderGraficosAnio(dataYr);
+        } else {
+          console.warn("No se pudo cargar NOAAYR.TXT:", resYr.status);
+        }
+
+      } catch (err) {
+        console.error("Error al cargar los reportes meteorológicos:", err);
+      } finally {
+        setTimeout(() => {
+          if (iconRefresh) iconRefresh.classList.remove('animate-spin');
+          feather.replace();
+        }, 400);
+      }
+    }
+
+    // Inicializar al cargar el DOM
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarReportes();
+    });
+  </script>
+</body>
+</html>
