@@ -6,9 +6,8 @@ on:
     paths:
       - '*.txt'          # Se ejecuta cuando se sube o actualiza un .txt
   schedule:
-    #- cron: '5 * * * *'  # Se ejecuta automáticamente el minuto 5 de cada hora
-    # Se ejecuta cada 30 minutos (en el minuto 0 y en el minuto 30 de cada hora)
-    - cron: '*/10 * * * *'
+       
+    - cron: '10 0 * * *'
 
 jobs:
   build:
