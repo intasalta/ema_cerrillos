@@ -301,15 +301,13 @@
                 <th class="px-3 py-2">T. Mín (°C)</th>
                 <th class="px-3 py-2">Hora Mín</th>
                 <th class="px-3 py-2">Lluvia (mm)</th>
-                <th class="px-3 py-2">ET (mm)</th>
-                <th class="px-3 py-2">Rad. Solar (W/m²)</th>
                 <th class="px-3 py-2">Viento Med (km/h)</th>
                 <th class="px-3 py-2">Ráfaga (km/h)</th>
                 <th class="px-3 py-2">Dir Dom</th>
               </tr>
             </thead>
             <tbody id="tabla-mes-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/40 font-mono">
-              <tr><td colspan="12" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
+              <tr><td colspan="10" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
             </tbody>
           </table>
         </div>
@@ -484,8 +482,6 @@
                 <th class="px-3 py-2">Extremo Bajo</th>
                 <th class="px-3 py-2">Días ≥ 32°C</th>
                 <th class="px-3 py-2">Lluvia Total (mm)</th>
-                <th class="px-3 py-2">ET Total (mm)</th>
-                <th class="px-3 py-2">Rad. Solar Máx (W/m²)</th>
                 <th class="px-3 py-2">Máx Día (mm)</th>
                 <th class="px-3 py-2">Días Lluvia</th>
                 <th class="px-3 py-2">Viento Med</th>
@@ -493,7 +489,7 @@
               </tr>
             </thead>
             <tbody id="tabla-anio-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/40 font-mono">
-              <tr><td colspan="14" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
+              <tr><td colspan="12" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
             </tbody>
             <tfoot id="tabla-anio-tfoot" class="bg-slate-100 dark:bg-slate-900/80 font-bold text-slate-800 dark:text-white font-mono border-t-2 border-slate-300 dark:border-slate-700">
             </tfoot>
@@ -930,32 +926,6 @@
             const wTime = parts[11] || '--';
             const wDir = parts[12] || '--';
 
-            let dayEt = '--';
-            let daySolar = '--';
-
-            // Mapear valores de ET y Radiación desde downld08 si coinciden los días
-            if (dlData && dlData.timeX) {
-              let etSumDay = 0;
-              let solarMaxDay = 0;
-              let foundDl = false;
-
-              for (let k = 0; k < dlData.timeX.length; k++) {
-                const dateObj = new Date(dlData.timeX[k]);
-                if (dateObj.getDate() === day) {
-                  foundDl = true;
-                  etSumDay += dlData.etY[k] || 0;
-                  if (dlData.solarRadY[k] > solarMaxDay) {
-                    solarMaxDay = dlData.solarRadY[k];
-                  }
-                }
-              }
-
-              if (foundDl) {
-                dayEt = etSumDay.toFixed(2);
-                daySolar = solarMaxDay.toFixed(0);
-              }
-            }
-
             dias.push(`Día ${day}`);
             tempMean.push(tMean);
             tempMax.push(tMax);
@@ -991,7 +961,7 @@
             }
 
             rowsTable.push({
-              day, tMean, tMax, tMaxTime, tMin, tMinTime, pRain, dayEt, daySolar, wAvg, wHigh, wDir
+              day, tMean, tMax, tMaxTime, tMin, tMinTime, pRain, wAvg, wHigh, wDir
             });
           }
         }
@@ -1028,15 +998,13 @@
       if (rowsTable.length > 0) {
         tbody.innerHTML = rowsTable.map(r => `
           <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-            <td class="px-3 py-1.5 font-bold text-slate-800 dark:text-white">Día ${r.day}</td>
+            <td class="px-3 py-1.5 font-bold text-slate-800 dark:text-white">${r.day}</td>
             <td class="px-3 py-1.5">${r.tMean.toFixed(1)}</td>
             <td class="px-3 py-1.5 text-red-500 font-semibold">${r.tMax.toFixed(1)}</td>
             <td class="px-3 py-1.5 text-slate-400 text-[11px]">${r.tMaxTime}</td>
             <td class="px-3 py-1.5 text-blue-500 font-semibold">${r.tMin.toFixed(1)}</td>
             <td class="px-3 py-1.5 text-slate-400 text-[11px]">${r.tMinTime}</td>
             <td class="px-3 py-1.5 ${r.pRain > 0 ? 'text-sky-500 font-bold' : 'text-slate-400'}">${r.pRain.toFixed(1)}</td>
-            <td class="px-3 py-1.5 text-emerald-500 font-semibold">${r.dayEt}</td>
-            <td class="px-3 py-1.5 text-amber-500 font-semibold">${r.daySolar}</td>
             <td class="px-3 py-1.5">${r.wAvg.toFixed(1)}</td>
             <td class="px-3 py-1.5 text-emerald-500">${r.wHigh.toFixed(1)}</td>
             <td class="px-3 py-1.5"><span class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px]">${r.wDir}</span></td>
@@ -1108,8 +1076,6 @@
               daysHeat: parseInt(p[12], 10) || 0,
               daysFrost: parseInt(p[14], 10) || 0,
               rainTotal: 0,
-              etTotal: 0,
-              solarMax: 0,
               rainMaxDay: 0,
               rainMaxDate: '--',
               rainDays: 0,
@@ -1258,8 +1224,6 @@
             <td class="px-3 py-2 text-blue-500 font-bold">${r.low.toFixed(1)} <span class="text-[10px] text-slate-400 font-normal">(${r.lowDate})</span></td>
             <td class="px-3 py-2 ${r.daysHeat > 0 ? 'text-orange-500 font-bold' : 'text-slate-400'}">${r.daysHeat}</td>
             <td class="px-3 py-2 font-bold ${r.rainTotal > 0 ? 'text-sky-500' : 'text-slate-400'}">${r.rainTotal.toFixed(1)}</td>
-            <td class="px-3 py-2 text-emerald-500 font-semibold">${r.etTotal > 0 ? r.etTotal.toFixed(1) : '--'}</td>
-            <td class="px-3 py-2 text-amber-500 font-semibold">${r.solarMax > 0 ? r.solarMax.toFixed(0) : '--'}</td>
             <td class="px-3 py-2">${r.rainMaxDay.toFixed(1)} <span class="text-[10px] text-slate-400">(${r.rainMaxDate})</span></td>
             <td class="px-3 py-2">${r.rainDays}</td>
             <td class="px-3 py-2">${r.windAvg.toFixed(1)}</td>
@@ -1279,8 +1243,6 @@
           <td class="px-3 py-2 text-blue-500 font-black">${totLow} (${totLowMonth})</td>
           <td class="px-3 py-2 text-orange-500">${totDaysHeat}</td>
           <td class="px-3 py-2 text-sky-500 font-black">${totRainAnnual.toFixed(1)}</td>
-          <td class="px-3 py-2 text-emerald-500 font-black">--</td>
-          <td class="px-3 py-2 text-amber-500 font-black">--</td>
           <td class="px-3 py-2">${totRainMaxDay} (${totRainMaxMonth})</td>
           <td class="px-3 py-2">${totRainDays}</td>
           <td class="px-3 py-2">${totWindAvg}</td>
