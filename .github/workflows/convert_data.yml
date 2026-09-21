@@ -1,0 +1,36 @@
+name: Convert Meteorologic Data to CSV and XLSX
+
+on:
+  push:
+    paths:
+      - '*.txt'          # Se ejecuta cuando se sube o actualiza un .txt
+  schedule:
+    #- cron: '5 * * * *'  # Se ejecuta automáticamente el minuto 5 de cada hora
+    # Se ejecuta cada 30 minutos (en el minuto 0 y en el minuto 30 de cada hora)
+    - cron: '*/10 * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias
+        run: |
+          pip install pandas openpyxl
+
+      - name: Ejecutar script de conversión
+        run: python parse_data.py
+
+      - name: Subir cambios formateados al repositorio
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'Auto-conversión de datos meteorológicos a CSV y XLSX'
+          file_pattern: '*.csv *.xlsx'
