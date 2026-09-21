@@ -3,7 +3,6 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-# Lista explícita de archivos a convertir
 ARCHIVOS_A_CONVERTIR = ["downld02.txt", "downld08.txt"]
 
 COL_NAMES = [
@@ -36,11 +35,15 @@ for file_path in ARCHIVOS_A_CONVERTIR:
     for line in lines[3:]:
         parts = line.strip().split()
         if len(parts) >= 30:
+            # Ajustar la longitud de la fila a la cantidad exacta de nombres de columnas
+            if len(parts) < len(COL_NAMES):
+                parts.extend([""] * (len(COL_NAMES) - len(parts)))
+            elif len(parts) > len(COL_NAMES):
+                parts = parts[:len(COL_NAMES)]
             data_rows.append(parts)
 
-    df = pd.DataFrame(data_rows)
-    if len(df.columns) == len(COL_NAMES):
-        df.columns = COL_NAMES
+    # Crear el DataFrame asignando explícitamente las columnas
+    df = pd.DataFrame(data_rows, columns=COL_NAMES)
 
     base_name = file_path.rsplit('.', 1)[0]
     
@@ -52,16 +55,19 @@ for file_path in ARCHIVOS_A_CONVERTIR:
     ws = wb.active
     ws.title = "Datos Meteorológicos"
 
+    # Título principal
     ws.merge_cells("A1:AH1")
     ws["A1"] = f"Reporte Estación Meteorológica - {base_name}"
     ws["A1"].font = Font(name="Calibri", size=14, bold=True, color="1F4E78")
 
-    for col_idx, col_name in enumerate(df.columns, 1):
+    # Encabezados en la Fila 3
+    for col_idx, col_name in enumerate(COL_NAMES, 1):
         cell = ws.cell(row=3, column=col_idx, value=col_name)
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    # Filas de datos
     for r_idx, row in df.iterrows():
         row_num = r_idx + 4
         fill = zebra_fill if r_idx % 2 == 1 else PatternFill(fill_type=None)
@@ -84,4 +90,4 @@ for file_path in ARCHIVOS_A_CONVERTIR:
 
     ws.freeze_panes = "A4"
     wb.save(f"{base_name}.xlsx")
-    print(f"Procesado: {file_path} -> {base_name}.csv y {base_name}.xlsx")
+    print(f"Procesado correctamente: {file_path} -> {base_name}.csv y {base_name}.xlsx")
