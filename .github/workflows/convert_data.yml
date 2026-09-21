@@ -1,6 +1,7 @@
 name: Convert Meteorologic Data to CSV and XLSX
 
 on:
+  workflow_dispatch:   # <--- Agrega esta linea
   push:
     paths:
       - '*.txt'          # Se ejecuta cuando se sube o actualiza un .txt
