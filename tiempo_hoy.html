@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Cerrillos Clima - INTA</title>
 
   <!-- PWA Web App Manifest dinámico -->
@@ -29,88 +29,85 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto">
+<body class="h-screen w-full flex flex-col justify-between p-3 max-w-md mx-auto overflow-hidden">
 
-  <!-- Header con Logo INTA -->
-  <header class="flex justify-between items-center py-4 border-b border-slate-800">
-    <div class="flex items-center gap-3">
-      <img src="./logo_inta.png" alt="Logo INTA" class="h-10 w-auto object-contain" onerror="this.style.display='none'" />
+  <!-- Header Compacto -->
+  <header class="flex justify-between items-center pb-2 border-b border-slate-800 shrink-0">
+    <div class="flex items-center gap-2.5">
+      <img src="./logo_inta.png" alt="Logo INTA" class="h-8 w-auto object-contain" onerror="this.style.display='none'" />
       <div>
         <h1 class="text-xs font-bold text-sky-400 tracking-wide uppercase leading-tight">El Tiempo en Cerrillos Salta</h1>
-        <p id="last-update" class="text-[11px] text-slate-400 mt-0.5">Estado: Actualizando...</p>
+        <p id="last-update" class="text-[10px] text-slate-400 mt-0.5">Estado: Actualizando...</p>
       </div>
     </div>
-    <button id="btn-refresh" onclick="fetchWeatherData()" class="p-2 bg-slate-800 hover:bg-slate-700 active:scale-95 transition rounded-full text-slate-300">
-      <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+    <button id="btn-refresh" onclick="fetchWeatherData()" class="p-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 transition rounded-full text-slate-300">
+      <i data-lucide="refresh-cw" class="w-4 h-4"></i>
     </button>
   </header>
 
-  <!-- Banner para Instalar PWA en Celular -->
-  <div id="install-banner" class="hidden my-3 p-3 glass-card rounded-xl border border-sky-500/30 flex items-center justify-between">
+  <!-- Banner PWA Compacto -->
+  <div id="install-banner" class="hidden my-1 p-2 glass-card rounded-lg border border-sky-500/30 flex items-center justify-between shrink-0">
     <div class="flex items-center gap-2">
-      <i data-lucide="download" class="w-5 h-5 text-sky-400"></i>
-      <span class="text-xs text-slate-200">Instalar App en el celular</span>
+      <i data-lucide="download" class="w-4 h-4 text-sky-400"></i>
+      <span class="text-[11px] text-slate-200">Instalar App en celular</span>
     </div>
-    <button id="btn-install" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-3 py-1 rounded-lg text-xs transition">
+    <button id="btn-install" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-2 py-0.5 rounded text-[11px] transition">
       Instalar
     </button>
   </div>
 
-  <!-- Dashboard Principal -->
-  <main class="my-auto py-6 space-y-4">
-    <!-- Temperatura Card -->
-    <div class="glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col items-center justify-center">
-      <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-      <i data-lucide="thermometer" class="w-10 h-10 text-amber-400 mb-2"></i>
-      <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Temperatura Actual</span>
-      <div class="flex items-baseline mt-1">
-        <span id="temp-val" class="text-6xl font-extrabold tracking-tight text-white">--</span>
-        <span class="text-2xl font-medium text-amber-400 ml-1">°C</span>
+  <!-- Dashboard Ajustado al alto libre -->
+  <main class="my-auto py-2 space-y-2.5 flex-1 flex flex-col justify-center">
+    <!-- Temperatura Principal -->
+    <div class="glass-card rounded-xl p-4 shadow-lg relative overflow-hidden flex flex-col items-center justify-center">
+      <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-500/10 rounded-full blur-xl"></div>
+      <i data-lucide="thermometer" class="w-7 h-7 text-amber-400 mb-1"></i>
+      <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Temperatura Actual</span>
+      <div class="flex items-baseline mt-0.5">
+        <span id="temp-val" class="text-5xl font-extrabold tracking-tight text-white">--</span>
+        <span class="text-xl font-medium text-amber-400 ml-1">°C</span>
       </div>
     </div>
 
     <!-- Grid Humedad y Precipitación -->
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-2 gap-2.5">
       <!-- Humedad -->
-      <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
-        <i data-lucide="droplets" class="w-8 h-8 text-sky-400 mb-2"></i>
-        <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Humedad</span>
-        <div class="flex items-baseline mt-1">
-          <span id="humidity-val" class="text-3xl font-bold text-white">--</span>
-          <span class="text-sm font-semibold text-sky-400 ml-0.5">%</span>
+      <div class="glass-card rounded-xl p-3 shadow-md flex flex-col items-center justify-center text-center">
+        <i data-lucide="droplets" class="w-6 h-6 text-sky-400 mb-1"></i>
+        <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Humedad</span>
+        <div class="flex items-baseline mt-0.5">
+          <span id="humidity-val" class="text-2xl font-bold text-white">--</span>
+          <span class="text-xs font-semibold text-sky-400 ml-0.5">%</span>
         </div>
       </div>
 
       <!-- Precipitación -->
-      <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
-        <i data-lucide="cloud-rain" class="w-8 h-8 text-blue-400 mb-2"></i>
-        <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Precipitación</span>
-        <div class="flex items-baseline mt-1">
-          <span id="rain-val" class="text-3xl font-bold text-white">--</span>
-          <span class="text-sm font-semibold text-blue-400 ml-0.5">mm</span>
+      <div class="glass-card rounded-xl p-3 shadow-md flex flex-col items-center justify-center text-center">
+        <i data-lucide="cloud-rain" class="w-6 h-6 text-blue-400 mb-1"></i>
+        <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Precipitación</span>
+        <div class="flex items-baseline mt-0.5">
+          <span id="rain-val" class="text-2xl font-bold text-white">--</span>
+          <span class="text-xs font-semibold text-blue-400 ml-0.5">mm</span>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Footer Limpio con Firma e Institución -->
-  <footer class="py-4 border-t border-slate-800 flex flex-col items-center text-center gap-3">
-    <button onclick="fetchWeatherData()" class="w-full py-3 bg-sky-600 hover:bg-sky-500 active:scale-98 transition rounded-xl font-semibold text-sm flex items-center justify-center gap-2 text-white shadow-lg shadow-sky-950">
-      <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+  <!-- Footer Fijo al Pie -->
+  <footer class="pt-2 border-t border-slate-800 flex flex-col items-center text-center gap-1.5 shrink-0">
+    <button onclick="fetchWeatherData()" class="w-full py-2 bg-sky-600 hover:bg-sky-500 active:scale-98 transition rounded-lg font-semibold text-xs flex items-center justify-center gap-2 text-white shadow-md shadow-sky-950">
+      <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
       Actualizar a demanda desde GitHub
     </button>
     
-    <div class="mt-1">
-      <p class="text-[11px] text-slate-400 font-medium leading-tight">
-        Fuente: Agrometeorologia - Grupo de RRNN INTA EEA SALTA
-      </p>
-    </div>
+    <p class="text-[10px] text-slate-400 font-medium leading-tight">
+      Fuente: Agrometeorología - Grupo de RRNN INTA EEA SALTA
+    </p>
   </footer>
 
   <script>
     const DATA_FILE_URL = './downld02.txt';
 
-    // Generar Manifest PWA
     const manifest = {
       name: "Tiempo Cerrillos Salta",
       short_name: "Cerrillos Clima",
@@ -161,7 +158,6 @@
       const tempVal = tokens[2];
       const humidityVal = tokens[5];
       
-      // Índice 15 para Rain: Sanitizado para evitar '---'
       let rainVal = tokens[15];
       if (!rainVal || rainVal === '---') {
         rainVal = '0.00';
@@ -173,7 +169,6 @@
       document.getElementById('last-update').innerText = `Último registro: ${dateStr} ${timeStr} hs`;
     }
 
-    // Service Worker PWA
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
