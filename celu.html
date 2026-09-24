@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cerrillos Clima - INTA</title>
+
+  <!-- PWA Web App Manifest dinámico -->
+  <link rel="manifest" id="manifest-placeholder" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between p-4 max-w-md mx-auto">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center py-3 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <img src="./logo_inta.png" alt="Logo INTA" class="h-9 w-auto object-contain" onerror="this.style.display='none'" />
+      <div>
+        <h1 class="text-xs font-bold text-sky-400 tracking-wide uppercase leading-tight">El Tiempo en Cerrillos Salta</h1>
+        <p id="last-update" class="text-[11px] text-slate-400 mt-0.5">Estado: Actualizando...</p>
+      </div>
+    </div>
+    <button id="btn-refresh" onclick="fetchWeatherData()" class="p-2 bg-slate-800 hover:bg-slate-700 active:scale-95 transition rounded-full text-slate-300">
+      <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+    </button>
+  </header>
+
+  <!-- Banner PWA -->
+  <div id="install-banner" class="hidden my-2 p-3 glass-card rounded-xl border border-sky-500/30 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <i data-lucide="download" class="w-4 h-4 text-sky-400"></i>
+      <span class="text-xs text-slate-200">Instalar App en el celular</span>
+    </div>
+    <button id="btn-install" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-2.5 py-1 rounded-lg text-xs transition">
+      Instalar
+    </button>
+  </div>
+
+  <!-- Dashboard Principal (Centrado de forma natural) -->
+  <main class="my-auto py-4 space-y-4">
+    <!-- Temperatura Principal -->
+    <div class="glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col items-center justify-center">
+      <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+      <i data-lucide="thermometer" class="w-9 h-9 text-amber-400 mb-2"></i>
+      <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Temperatura Actual</span>
+      <div class="flex items-baseline mt-1">
+        <span id="temp-val" class="text-6xl font-extrabold tracking-tight text-white">--</span>
+        <span class="text-2xl font-medium text-amber-400 ml-1">°C</span>
+      </div>
+    </div>
+
+    <!-- Grid Humedad y Precipitación -->
+    <div class="grid grid-cols-2 gap-3.5">
+      <!-- Humedad -->
+      <div class="glass-card rounded-2xl p-4 shadow-lg flex flex-col items-center justify-center text-center">
+        <i data-lucide="droplets" class="w-7 h-7 text-sky-400 mb-2"></i>
+        <span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Humedad</span>
+        <div class="flex items-baseline mt-1">
+          <span id="humidity-val" class="text-3xl font-bold text-white">--</span>
+          <span class="text-sm font-semibold text-sky-400 ml-0.5">%</span>
+        </div>
+      </div>
+
+      <!-- Precipitación -->
+      <div class="glass-card rounded-2xl p-4 shadow-lg flex flex-col items-center justify-center text-center">
+        <i data-lucide="cloud-rain" class="w-7 h-7 text-blue-400 mb-2"></i>
+        <span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Precipitación</span>
+        <div class="flex items-baseline mt-1">
+          <span id="rain-val" class="text-3xl font-bold text-white">--</span>
+          <span class="text-sm font-semibold text-blue-400 ml-0.5">mm</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="pt-3 pb-2 border-t border-slate-800 flex flex-col items-center text-center gap-2.5">
+    <button onclick="fetchWeatherData()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 active:scale-98 transition rounded-xl font-semibold text-xs flex items-center justify-center gap-2 text-white shadow-lg shadow-sky-950">
+      <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+      Actualizar a demanda desde GitHub
+    </button>
+    
+    <p class="text-[11px] text-slate-400 font-medium leading-tight">
+      Fuente: Agrometeorología - Grupo de RRNN INTA EEA SALTA
+    </p>
+  </footer>
+
+  <script>
+    const DATA_FILE_URL = './downld02.txt';
+
+    const manifest = {
+      name: "Tiempo Cerrillos Salta",
+      short_name: "Cerrillos Clima",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#0f172a",
+      theme_color: "#0f172a",
+      icons: [{
+        src: "./logo_inta.png",
+        sizes: "512x512",
+        type: "image/png"
+      }]
+    };
+    const stringManifest = JSON.stringify(manifest);
+    const blob = new Blob([stringManifest], {type: 'application/json'});
+    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+
+    lucide.createIcons();
+
+    async function fetchWeatherData() {
+      const btnRefresh = document.getElementById('btn-refresh');
+      btnRefresh.classList.add('animate-spin');
+      
+      try {
+        const response = await fetch(DATA_FILE_URL, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Error al conectar con GitHub');
+        const textData = await response.text();
+        parseAndDisplay(textData);
+      } catch (error) {
+        console.error(error);
+        document.getElementById('last-update').innerText = 'Error al actualizar datos';
+      } finally {
+        btnRefresh.classList.remove('animate-spin');
+      }
+    }
+
+    function parseAndDisplay(rawText) {
+      const lines = rawText.trim().split('\n').filter(line => line.trim().length > 0);
+      const dataLines = lines.filter(line => /^\d{2}\/\d{2}\/\d{2}/.test(line.trim()));
+
+      if (dataLines.length === 0) return;
+
+      const lastLine = dataLines[dataLines.length - 1];
+      const tokens = lastLine.trim().split(/\s+/);
+
+      const dateStr = tokens[0];
+      const timeStr = tokens[1];
+      const tempVal = tokens[2];
+      const humidityVal = tokens[5];
+      
+      let rainVal = tokens[15];
+      if (!rainVal || rainVal === '---') {
+        rainVal = '0.00';
+      }
+
+      document.getElementById('temp-val').innerText = tempVal;
+      document.getElementById('humidity-val').innerText = humidityVal;
+      document.getElementById('rain-val').innerText = rainVal;
+      document.getElementById('last-update').innerText = `Último registro: ${dateStr} ${timeStr} hs`;
+    }
+
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => self.clients.claim());
+        self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+      `;
+      const blobSW = new Blob([swCode], { type: 'text/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blobSW)).catch(() => {});
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-banner').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-install').addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        document.getElementById('install-banner').classList.add('hidden');
+      }
+      deferredPrompt = null;
+    });
+
+    window.addEventListener('DOMContentLoaded', fetchWeatherData);
+  </script>
+</body>
+</html>
