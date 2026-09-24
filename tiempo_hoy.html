@@ -165,13 +165,15 @@
 
       // Estructura estándar Davis WeatherLink:
       // Tokens: [0] Date, [1] Time, [2] Temp Out, [3] Hi Temp, [4] Low Temp, [5] Out Hum, ..., [16] Rain
-      const dateStr = tokens[0];
-      const timeStr = tokens[1];
-      const tempVal = tokens[2];
-      const humidityVal = tokens[5];
+     
+      // Ajusta los índices del arreglo de datos en parseAndDisplay:
+      const dateStr = tokens[0];      // Date (ej. 24/09/26)
+      const timeStr = tokens[1];      // Time (ej. 14:00)
+      const tempVal = tokens[2];      // Temp Out (ej. 29.3)
+      const humidityVal = tokens[5];  // Out Hum (ej. 27)
       
-      // La columna de lluvia del día / intervalo suele ubicarse en la posición 16
-      const rainVal = tokens[16] || "0.00";
+      // CAMBIO AQUÍ: La columna Rain (precipitación) es el índice 15
+      const rainVal = tokens[15] || "0.00"; // Rain (ej. 0.00)
 
       // Actualizar DOM
       document.getElementById('temp-val').innerText = tempVal;
