@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cerrillos Clima - PWA</title>
+  <title>Cerrillos Clima - INTA</title>
 
   <!-- PWA Web App Manifest dinámico -->
   <link rel="manifest" id="manifest-placeholder" />
@@ -31,11 +31,14 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto">
 
-  <!-- Header -->
+  <!-- Header con Logo INTA -->
   <header class="flex justify-between items-center py-4 border-b border-slate-800">
-    <div>
-      <h1 class="text-xl font-bold text-sky-400 tracking-wide">EL TIEMPO EN CERRILLOS SALTA</h1>
-      <p id="last-update" class="text-xs text-slate-400 mt-0.5">Estado: Esperando actualización...</p>
+    <div class="flex items-center gap-3">
+      <img src="./logo_inta.png" alt="Logo INTA" class="h-10 w-auto object-contain" onerror="this.style.display='none'" />
+      <div>
+        <h1 class="text-xs font-bold text-sky-400 tracking-wide uppercase leading-tight">El Tiempo en Cerrillos Salta</h1>
+        <p id="last-update" class="text-[11px] text-slate-400 mt-0.5">Estado: Actualizando...</p>
+      </div>
     </div>
     <button id="btn-refresh" onclick="fetchWeatherData()" class="p-2 bg-slate-800 hover:bg-slate-700 active:scale-95 transition rounded-full text-slate-300">
       <i data-lucide="refresh-cw" class="w-5 h-5"></i>
@@ -46,14 +49,14 @@
   <div id="install-banner" class="hidden my-3 p-3 glass-card rounded-xl border border-sky-500/30 flex items-center justify-between">
     <div class="flex items-center gap-2">
       <i data-lucide="download" class="w-5 h-5 text-sky-400"></i>
-      <span class="text-xs text-slate-200">Instala esta App en tu celular</span>
+      <span class="text-xs text-slate-200">Instalar App en el celular</span>
     </div>
     <button id="btn-install" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-3 py-1 rounded-lg text-xs transition">
       Instalar
     </button>
   </div>
 
-  <!-- Main Dashboard -->
+  <!-- Dashboard Principal -->
   <main class="my-auto py-6 space-y-4">
     <!-- Temperatura Card -->
     <div class="glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col items-center justify-center">
@@ -78,10 +81,10 @@
         </div>
       </div>
 
-      <!-- Precipitación del día -->
+      <!-- Precipitación -->
       <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
         <i data-lucide="cloud-rain" class="w-8 h-8 text-blue-400 mb-2"></i>
-        <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Lluvia del Día</span>
+        <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Precipitación</span>
         <div class="flex items-baseline mt-1">
           <span id="rain-val" class="text-3xl font-bold text-white">--</span>
           <span class="text-sm font-semibold text-blue-400 ml-0.5">mm</span>
@@ -90,24 +93,24 @@
     </div>
   </main>
 
-  <!-- Footer / Selector de Archivo Local de Respaldo -->
-  <footer class="py-4 border-t border-slate-800 flex flex-col items-center gap-3">
+  <!-- Footer Limpio con Firma e Institución -->
+  <footer class="py-4 border-t border-slate-800 flex flex-col items-center text-center gap-3">
     <button onclick="fetchWeatherData()" class="w-full py-3 bg-sky-600 hover:bg-sky-500 active:scale-98 transition rounded-xl font-semibold text-sm flex items-center justify-center gap-2 text-white shadow-lg shadow-sky-950">
       <i data-lucide="rotate-cw" class="w-4 h-4"></i>
       Actualizar a demanda desde GitHub
     </button>
     
-    <label class="text-xs text-slate-500 underline cursor-pointer hover:text-slate-400">
-      Cargar archivo local (downld02.txt)
-      <input type="file" id="file-input" accept=".txt" class="hidden" onchange="loadLocalFile(event)" />
-    </label>
+    <div class="mt-1">
+      <p class="text-[11px] text-slate-400 font-medium leading-tight">
+        Fuente: Agrometeorologia - Grupo de RRNN INTA EEA SALTA
+      </p>
+    </div>
   </footer>
 
   <script>
-    // Configuración: Nombre relativo del archivo en el mismo repositorio GitHub
     const DATA_FILE_URL = './downld02.txt';
 
-    // Generar Manifest PWA al vuelo
+    // Generar Manifest PWA
     const manifest = {
       name: "Tiempo Cerrillos Salta",
       short_name: "Cerrillos Clima",
@@ -116,7 +119,7 @@
       background_color: "#0f172a",
       theme_color: "#0f172a",
       icons: [{
-        src: "https://cdn-icons-png.flaticon.com/512/1163/1163661.png",
+        src: "./logo_inta.png",
         sizes: "512x512",
         type: "image/png"
       }]
@@ -125,71 +128,52 @@
     const blob = new Blob([stringManifest], {type: 'application/json'});
     document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
 
-    // Inicializar Iconos
     lucide.createIcons();
 
-    // Obtención de datos remotos desde GitHub (a demanda)
     async function fetchWeatherData() {
       const btnRefresh = document.getElementById('btn-refresh');
       btnRefresh.classList.add('animate-spin');
       
       try {
-        // Evitamos el almacenamiento en caché enviando headers no-cache
         const response = await fetch(DATA_FILE_URL, { cache: 'no-store' });
-        if (!response.ok) throw new Error('No se pudo cargar el archivo desde GitHub');
+        if (!response.ok) throw new Error('Error al conectar con GitHub');
         const textData = await response.text();
         parseAndDisplay(textData);
       } catch (error) {
         console.error(error);
-        document.getElementById('last-update').innerText = 'Error al conectar con GitHub';
+        document.getElementById('last-update').innerText = 'Error al actualizar datos';
       } finally {
         btnRefresh.classList.remove('animate-spin');
       }
     }
 
-    // Parser especializado para archivos Davis WeatherLink (downld02.txt)
     function parseAndDisplay(rawText) {
       const lines = rawText.trim().split('\n').filter(line => line.trim().length > 0);
-      
-      // Filtrar líneas de datos válidas (que empiecen con fecha formato YY/MM/DD o DD/MM/YY)
       const dataLines = lines.filter(line => /^\d{2}\/\d{2}\/\d{2}/.test(line.trim()));
 
-      if (dataLines.length === 0) {
-        alert('Formato de archivo invalido');
-        return;
-      }
+      if (dataLines.length === 0) return;
 
-      // Tomar la última hora/registro del archivo
       const lastLine = dataLines[dataLines.length - 1];
       const tokens = lastLine.trim().split(/\s+/);
 
-      // Estructura estándar Davis WeatherLink:
-      // Tokens: [0] Date, [1] Time, [2] Temp Out, [3] Hi Temp, [4] Low Temp, [5] Out Hum, ..., [16] Rain
       const dateStr = tokens[0];
       const timeStr = tokens[1];
       const tempVal = tokens[2];
       const humidityVal = tokens[5];
       
-      // La columna de lluvia del día / intervalo suele ubicarse en la posición 16
-      const rainVal = tokens[16] || "0.00";
+      // Índice 15 para Rain: Sanitizado para evitar '---'
+      let rainVal = tokens[15];
+      if (!rainVal || rainVal === '---') {
+        rainVal = '0.00';
+      }
 
-      // Actualizar DOM
       document.getElementById('temp-val').innerText = tempVal;
       document.getElementById('humidity-val').innerText = humidityVal;
       document.getElementById('rain-val').innerText = rainVal;
       document.getElementById('last-update').innerText = `Último registro: ${dateStr} ${timeStr} hs`;
     }
 
-    // Permitir carga local de respaldo
-    function loadLocalFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => parseAndDisplay(e.target.result);
-      reader.readAsText(file);
-    }
-
-    // Registrar Service Worker para soporte PWA Offline
+    // Service Worker PWA
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
@@ -200,7 +184,6 @@
       navigator.serviceWorker.register(URL.createObjectURL(blobSW)).catch(() => {});
     }
 
-    // Capturar evento de instalación PWA en el celular
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -218,7 +201,6 @@
       deferredPrompt = null;
     });
 
-    // Carga inicial al abrir la App
     window.addEventListener('DOMContentLoaded', fetchWeatherData);
   </script>
 </body>
