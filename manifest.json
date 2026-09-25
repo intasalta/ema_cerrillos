@@ -1,7 +1,7 @@
 {
   "name": "Tiempo Cerrillos Salta - INTA",
   "short_name": "Clima INTA",
-  "start_url": "./celu.html",
+  "start_url": "./tiempo_hoy.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
