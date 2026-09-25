@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Cerrillos Clima - INTA</title>
 
-  <!-- PWA Web App Manifest dinámico -->
-  <link rel="manifest" id="manifest-placeholder" />
+  <!-- PWA Web App Manifest y Favicons para Celular -->
+  <link rel="manifest" href="./manifest.json" id="manifest-placeholder" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icono_app.png" />
+  <link rel="shortcut icon" href="./icono_app.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icono_app.png" />
   <meta name="theme-color" content="#090d16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Clima INTA" />
-  <link rel="apple-touch-icon" href="./logo_inta.png" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -97,8 +99,8 @@
   <div id="install-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end sm:items-center justify-center p-3">
     <div class="glass-card bg-slate-900/95 border border-sky-500/30 rounded-3xl p-5 w-full max-w-sm shadow-2xl relative animate-fade-in text-slate-100">
       <div class="flex items-center gap-3 mb-3">
-        <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-2xl flex items-center justify-center w-12 h-12 shrink-0">
-          <img src="./logo_inta.png" alt="INTA" class="w-full h-full object-contain" onerror="this.src=''" />
+        <div class="p-1 bg-sky-500/10 rounded-2xl flex items-center justify-center w-14 h-14 shrink-0 overflow-hidden border border-sky-400/20 shadow-md">
+          <img src="./icono_app.png" alt="Clima INTA" class="w-full h-full object-cover rounded-xl" onerror="this.src='./logo_inta.png'" />
         </div>
         <div>
           <h3 class="text-sm font-bold text-white">Instalar en la pantalla de inicio</h3>
@@ -272,7 +274,7 @@
     const INDEX_FILE_URL = './index.html';
     const DATA_FILE_URL = './downld02.txt';
 
-    // Generar manifest dinámico para PWA
+    // Generar manifest dinámico para PWA con icono_app.png
     const manifest = {
       name: "Tiempo Cerrillos Salta - INTA",
       short_name: "Clima INTA",
@@ -280,11 +282,25 @@
       display: "standalone",
       background_color: "#090d16",
       theme_color: "#090d16",
-      icons: [{
-        src: "./logo_inta.png",
-        sizes: "512x512",
-        type: "image/png"
-      }]
+      icons: [
+        {
+          src: "./icono_app.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any maskable"
+        },
+        {
+          src: "./icono_app.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable"
+        },
+        {
+          src: "./logo_inta.png",
+          sizes: "512x512",
+          type: "image/png"
+        }
+      ]
     };
     const stringManifest = JSON.stringify(manifest);
     const blob = new Blob([stringManifest], {type: 'application/json'});
