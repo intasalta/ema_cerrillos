@@ -274,37 +274,7 @@
     const INDEX_FILE_URL = './index.html';
     const DATA_FILE_URL = './downld02.txt';
 
-    // Generar manifest dinámico para PWA con icono_app.png
-    const manifest = {
-      name: "Tiempo Cerrillos Salta - INTA",
-      short_name: "Clima INTA",
-      start_url: "./celu.html",
-      display: "standalone",
-      background_color: "#090d16",
-      theme_color: "#090d16",
-      icons: [
-        {
-          src: "./icono_app.png",
-          sizes: "192x192",
-          type: "image/png",
-          purpose: "any maskable"
-        },
-        {
-          src: "./icono_app.png",
-          sizes: "512x512",
-          type: "image/png",
-          purpose: "any maskable"
-        },
-        {
-          src: "./logo_inta.png",
-          sizes: "512x512",
-          type: "image/png"
-        }
-      ]
-    };
-    const stringManifest = JSON.stringify(manifest);
-    const blob = new Blob([stringManifest], {type: 'application/json'});
-    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+
 
     lucide.createIcons();
 
