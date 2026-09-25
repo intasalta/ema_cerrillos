@@ -2,14 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Cerrillos Clima - INTA</title>
 
   <!-- PWA Web App Manifest dinámico -->
   <link rel="manifest" id="manifest-placeholder" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#090d16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Clima INTA" />
+  <link rel="apple-touch-icon" href="./logo_inta.png" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,107 +19,267 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    :root {
+      color-scheme: dark;
+    }
     body {
-      background-color: #0f172a;
+      background: radial-gradient(circle at top, #111827 0%, #090d16 100%);
       color: #f8fafc;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: max(0.75rem, env(safe-area-inset-top));
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+      padding-left: max(0.85rem, env(safe-area-inset-left));
+      padding-right: max(0.85rem, env(safe-area-inset-right));
     }
     .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    }
+    .glass-hero {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.92) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
+    }
+    .pulse-dot {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto">
+<body class="min-h-screen w-full flex flex-col justify-start max-w-md mx-auto space-y-3">
 
-  <!-- Header con Logo INTA -->
-  <header class="flex justify-between items-center py-4 border-b border-slate-800">
-    <div class="flex items-center gap-3">
-      <img src="./logo_inta.png" alt="Logo INTA" class="h-10 w-auto object-contain" onerror="this.style.display='none'" />
-      <div>
-        <h1 class="text-xs font-bold text-sky-400 tracking-wide uppercase leading-tight">El Tiempo en Cerrillos Salta</h1>
-        <p id="last-update" class="text-[11px] text-slate-400 mt-0.5">Estado: Actualizando...</p>
+  <!-- Encabezado compacto institucional -->
+  <header class="glass-card rounded-2xl px-3.5 py-2.5 flex items-center justify-between border-slate-800/80">
+    <div class="flex items-center gap-2.5">
+      <div class="bg-white/95 p-1 rounded-xl shadow-sm flex items-center justify-center w-9 h-9 shrink-0">
+        <img src="./logo_inta.png" alt="INTA" class="w-full h-full object-contain" onerror="this.parentElement.style.display='none'" />
+      </div>
+      <div class="leading-tight">
+        <div class="flex items-center gap-1.5">
+          <span class="text-sm font-bold text-white tracking-wide">INTA Cerrillos</span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-950/80 text-sky-300 border border-sky-600/30">Salta</span>
+        </div>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot inline-block"></span>
+          <p id="last-update" class="text-[11px] text-slate-400 font-medium">Actualizando...</p>
+        </div>
       </div>
     </div>
-    <button id="btn-refresh" onclick="fetchWeatherData()" class="p-2 bg-slate-800 hover:bg-slate-700 active:scale-95 transition rounded-full text-slate-300">
-      <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-    </button>
+
+    <div class="flex items-center gap-1.5">
+      <!-- Botón para instalar PWA (discreto en encabezado) -->
+      <button id="btn-header-install" onclick="openInstallModal()" title="Instalar en el celular" class="hidden p-2 bg-sky-500/10 hover:bg-sky-500/20 active:scale-95 text-sky-400 rounded-xl border border-sky-500/30 text-xs font-semibold flex items-center gap-1">
+        <i data-lucide="smartphone" class="w-4 h-4"></i>
+        <span class="text-[11px] pr-0.5">Instalar</span>
+      </button>
+
+      <button id="btn-refresh" onclick="fetchWeatherData()" title="Actualizar datos" class="p-2.5 bg-slate-800/90 hover:bg-slate-700 active:scale-95 transition-all rounded-xl text-slate-300 hover:text-white border border-slate-700/50 shadow-inner">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+    </div>
   </header>
 
-  <!-- Banner para Instalar PWA en Celular -->
-  <div id="install-banner" class="hidden my-3 p-3 glass-card rounded-xl border border-sky-500/30 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <i data-lucide="download" class="w-5 h-5 text-sky-400"></i>
-      <span class="text-xs text-slate-200">Instalar App en el celular</span>
+  <!-- Modal / Banner de Instalación (aparece la 1ra vez que se abre) -->
+  <div id="install-modal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end sm:items-center justify-center p-3">
+    <div class="glass-card bg-slate-900/95 border border-sky-500/30 rounded-3xl p-5 w-full max-w-sm shadow-2xl relative animate-fade-in text-slate-100">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-2xl flex items-center justify-center w-12 h-12 shrink-0">
+          <img src="./logo_inta.png" alt="INTA" class="w-full h-full object-contain" onerror="this.src=''" />
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-white">Instalar en la pantalla de inicio</h3>
+          <p class="text-xs text-sky-300 font-medium">Acceso rápido con ícono en tu celular</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Podés consultar el tiempo de la estación INTA Cerrillos al instante desde tu teléfono sin necesidad de abrir el navegador.
+      </p>
+
+      <!-- Instrucciones dinámicas según SO -->
+      <div id="ios-instructions" class="hidden bg-slate-800/80 p-3 rounded-2xl border border-slate-700 text-xs space-y-2 mb-4">
+        <p class="font-semibold text-sky-300 flex items-center gap-1.5">
+          <i data-lucide="info" class="w-4 h-4"></i> En Safari (iPhone):
+        </p>
+        <p class="text-slate-300">1. Tocá el botón <strong>Compartir</strong> <span class="inline-flex px-1.5 py-0.5 bg-slate-700 rounded text-[11px] text-sky-400">⎋</span> en la barra inferior.</p>
+        <p class="text-slate-300">2. Deslizá y elegí <strong>"Agregar al inicio"</strong> <span class="inline-flex px-1.5 py-0.5 bg-slate-700 rounded text-[11px] text-sky-400">➕</span>.</p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <button id="btn-install-action" onclick="handleInstallClick()" class="w-full py-2.5 px-4 bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 font-bold rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Agregar a la Pantalla de Inicio</span>
+        </button>
+
+        <button onclick="dismissInstallModal()" class="w-full py-2 text-center text-xs text-slate-400 hover:text-slate-200">
+          Ahora no / Ya la instalé
+        </button>
+      </div>
     </div>
-    <button id="btn-install" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-3 py-1 rounded-lg text-xs transition">
-      Instalar
-    </button>
   </div>
 
-  <!-- Dashboard Principal -->
-  <main class="my-auto py-6 space-y-4">
-    <!-- Temperatura Card -->
-    <div class="glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col items-center justify-center">
-      <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-      <i data-lucide="thermometer" class="w-10 h-10 text-amber-400 mb-2"></i>
-      <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Temperatura Actual</span>
-      <div class="flex items-baseline mt-1">
-        <span id="temp-val" class="text-6xl font-extrabold tracking-tight text-white">--</span>
-        <span class="text-2xl font-medium text-amber-400 ml-1">°C</span>
-      </div>
-    </div>
+  <!-- Contenedor Principal Ajustado al Celular -->
+  <main class="flex flex-col space-y-3 flex-1">
 
-    <!-- Grid Humedad y Precipitación -->
-    <div class="grid grid-cols-2 gap-4">
-      <!-- Humedad -->
-      <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
-        <i data-lucide="droplets" class="w-8 h-8 text-sky-400 mb-2"></i>
-        <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Humedad</span>
-        <div class="flex items-baseline mt-1">
-          <span id="humidity-val" class="text-3xl font-bold text-white">--</span>
-          <span class="text-sm font-semibold text-sky-400 ml-0.5">%</span>
+    <!-- Card Principal: Temperatura Actual + Hora + Extremos Diarios + Sensación Térmica -->
+    <div class="glass-hero rounded-3xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between">
+      <div class="absolute -right-8 -top-8 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-8 -bottom-8 w-36 h-36 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Fila superior: Temperatura y Hora del Registro -->
+      <div class="flex items-center justify-between mb-1">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="thermometer" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Temperatura Actual</span>
+        </div>
+        <div class="flex items-center gap-1 text-[11px] text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-full border border-slate-700/60 font-medium">
+          <i data-lucide="clock" class="w-3 h-3 text-sky-400"></i>
+          <span id="temp-time">--:--</span> hs
         </div>
       </div>
 
-      <!-- Precipitación -->
-      <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center text-center">
-        <i data-lucide="cloud-rain" class="w-8 h-8 text-blue-400 mb-2"></i>
-        <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Precipitación</span>
-        <div class="flex items-baseline mt-1">
-          <span id="rain-val" class="text-3xl font-bold text-white">--</span>
-          <span class="text-sm font-semibold text-blue-400 ml-0.5">mm</span>
+      <!-- Valor grande de Temperatura con Sensación Térmica al costado -->
+      <div class="flex items-baseline justify-between my-1">
+        <div class="flex items-baseline">
+          <span id="temp-val" class="text-6xl font-black tracking-tight text-white drop-shadow">--</span>
+          <span class="text-2xl font-bold text-amber-400 ml-1">°C</span>
+        </div>
+        <div id="st-pill" class="text-right text-xs bg-slate-900/60 px-2.5 py-1 rounded-xl border border-slate-700/40">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Sensación</span>
+          <span class="font-bold text-amber-300 text-sm"><span id="st-val">--</span>°C</span>
+        </div>
+      </div>
+
+      <!-- Fila inferior: Máxima y Mínima del día (con hora) y Punto de Rocío -->
+      <div class="pt-2 mt-1 border-t border-slate-700/50 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-1 text-slate-300">
+          <span class="text-rose-400 font-bold">▲ Máx:</span>
+          <span id="temp-hi" class="font-bold text-white">--</span>°C
+          <span id="temp-hi-time" class="text-[10px] text-slate-400 font-normal">(--:--)</span>
+        </div>
+        <div class="h-3 w-px bg-slate-700"></div>
+        <div class="flex items-center gap-1 text-slate-300">
+          <span class="text-sky-400 font-bold">▼ Mín:</span>
+          <span id="temp-low" class="font-bold text-white">--</span>°C
+          <span id="temp-low-time" class="text-[10px] text-slate-400 font-normal">(--:--)</span>
+        </div>
+        <div class="h-3 w-px bg-slate-700"></div>
+        <div class="flex items-center gap-1 text-slate-400 text-[11px]">
+          <span>Rocío:</span>
+          <span id="dew-val" class="font-medium text-slate-200">--</span>°C
         </div>
       </div>
     </div>
+
+    <!-- Grilla 2x2 de Parámetros Meteorológicos (Con ET y sin Presión Barométrica) -->
+    <div class="grid grid-cols-2 gap-2.5">
+
+      <!-- Tarjeta 1: Humedad Relativa Actual -->
+      <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-[11px] font-semibold uppercase tracking-wider">Humedad</span>
+          <i data-lucide="droplets" class="w-4 h-4 text-sky-400"></i>
+        </div>
+        <div class="flex items-baseline my-0.5">
+          <span id="humidity-val" class="text-3xl font-extrabold text-white">--</span>
+          <span class="text-base font-bold text-sky-400 ml-0.5">%</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1 truncate">
+          Humedad relativa actual
+        </p>
+      </div>
+
+      <!-- Tarjeta 2: Precipitación del Día -->
+      <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-[11px] font-semibold uppercase tracking-wider">Lluvia del Día</span>
+          <i data-lucide="cloud-rain" class="w-4 h-4 text-blue-400"></i>
+        </div>
+        <div class="flex items-baseline my-0.5">
+          <span id="rain-val" class="text-3xl font-extrabold text-white">--</span>
+          <span class="text-base font-bold text-blue-400 ml-0.5">mm</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1 truncate">
+          Tasa: <span id="rain-rate-val" class="text-slate-200 font-medium">0.0</span> mm/h
+        </p>
+      </div>
+
+      <!-- Tarjeta 3: Evapotranspiración (ET) -> Reemplazo de Presión Barométrica -->
+      <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-[11px] font-semibold uppercase tracking-wider">Evapotransp. (ET)</span>
+          <i data-lucide="sun-medium" class="w-4 h-4 text-amber-400"></i>
+        </div>
+        <div class="flex items-baseline my-0.5">
+          <span id="et-daily-val" class="text-3xl font-extrabold text-white">--</span>
+          <span class="text-xs font-bold text-amber-400 ml-1">mm</span>
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-slate-300 mt-1">
+          <span class="truncate">Diaria: <strong class="text-amber-300 font-semibold" id="et-daily-sub">--</strong></span>
+          <span class="truncate">Últ. hora: <strong class="text-slate-100 font-semibold" id="et-hour-val">--</strong></span>
+        </div>
+      </div>
+
+      <!-- Tarjeta 4: Viento -->
+      <div class="glass-card rounded-2xl p-3.5 flex flex-col justify-between relative overflow-hidden">
+        <div class="flex items-center justify-between text-slate-400 mb-1">
+          <span class="text-[11px] font-semibold uppercase tracking-wider">Viento</span>
+          <i data-lucide="wind" class="w-4 h-4 text-teal-400"></i>
+        </div>
+        <div class="flex items-baseline my-0.5">
+          <span id="wind-speed-val" class="text-3xl font-extrabold text-white">--</span>
+          <span class="text-xs font-bold text-teal-400 ml-1">km/h</span>
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
+          <span class="truncate">Rumbo: <strong id="wind-dir-val" class="text-slate-200 font-semibold">---</strong></span>
+          <span class="truncate">Ráfaga: <strong id="wind-hi-val" class="text-slate-200 font-semibold">--</strong></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Botón de Actualización y Pie Institucional -->
+    <div class="pt-1 flex flex-col items-center gap-2">
+      <button onclick="fetchWeatherData()" class="w-full py-2.5 px-4 bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-500 hover:to-sky-600 active:scale-[0.98] transition-all rounded-xl font-bold text-xs flex items-center justify-center gap-2 text-white shadow-md shadow-sky-950/60 border border-sky-400/20">
+        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+        Actualizar Datos
+      </button>
+
+      <div class="text-center">
+        <p class="text-[11px] text-slate-400 font-medium">
+          Estación Davis Vantage Pro 2 · INTA Cerrillos Salta
+        </p>
+      </div>
+    </div>
+
   </main>
 
-  <!-- Footer Limpio con Firma e Institución -->
-  <footer class="py-4 border-t border-slate-800 flex flex-col items-center text-center gap-3">
-    <button onclick="fetchWeatherData()" class="w-full py-3 bg-sky-600 hover:bg-sky-500 active:scale-98 transition rounded-xl font-semibold text-sm flex items-center justify-center gap-2 text-white shadow-lg shadow-sky-950">
-      <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-      Actualizar a demanda desde GitHub
-    </button>
-    
-    <div class="mt-1">
-      <p class="text-[11px] text-slate-400 font-medium leading-tight">
-        Fuente: Agrometeorologia - Grupo de RRNN INTA EEA SALTA
-      </p>
-    </div>
-  </footer>
-
   <script>
+    const INDEX_FILE_URL = './index.html';
     const DATA_FILE_URL = './downld02.txt';
 
-    // Generar Manifest PWA
+    // Generar manifest dinámico para PWA
     const manifest = {
-      name: "Tiempo Cerrillos Salta",
-      short_name: "Cerrillos Clima",
-      start_url: "./",
+      name: "Tiempo Cerrillos Salta - INTA",
+      short_name: "Clima INTA",
+      start_url: "./celu.html",
       display: "standalone",
-      background_color: "#0f172a",
-      theme_color: "#0f172a",
+      background_color: "#090d16",
+      theme_color: "#090d16",
       icons: [{
         src: "./logo_inta.png",
         sizes: "512x512",
@@ -130,50 +292,283 @@
 
     lucide.createIcons();
 
+    // Consulta principal de datos: index.html (principal) y downld02.txt (ET última hora y fallback)
     async function fetchWeatherData() {
       const btnRefresh = document.getElementById('btn-refresh');
       btnRefresh.classList.add('animate-spin');
       
       try {
-        const response = await fetch(DATA_FILE_URL, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Error al conectar con GitHub');
-        const textData = await response.text();
-        parseAndDisplay(textData);
+        const [resIndex, resDownld] = await Promise.allSettled([
+          fetch(INDEX_FILE_URL, { cache: 'no-store' }),
+          fetch(DATA_FILE_URL, { cache: 'no-store' })
+        ]);
+
+        let indexHtml = null;
+        let downldText = null;
+
+        if (resIndex.status === 'fulfilled' && resIndex.value.ok) {
+          indexHtml = await resIndex.value.text();
+        }
+        if (resDownld.status === 'fulfilled' && resDownld.value.ok) {
+          downldText = await resDownld.value.text();
+        }
+
+        if (!indexHtml && !downldText) {
+          throw new Error('No se pudo acceder a los datos de la estación');
+        }
+
+        processData(indexHtml, downldText);
       } catch (error) {
         console.error(error);
-        document.getElementById('last-update').innerText = 'Error al actualizar datos';
+        document.getElementById('last-update').innerText = 'Sin conexión de datos';
       } finally {
-        btnRefresh.classList.remove('animate-spin');
+        setTimeout(() => {
+          btnRefresh.classList.remove('animate-spin');
+        }, 350);
       }
     }
 
-    function parseAndDisplay(rawText) {
-      const lines = rawText.trim().split('\n').filter(line => line.trim().length > 0);
-      const dataLines = lines.filter(line => /^\d{2}\/\d{2}\/\d{2}/.test(line.trim()));
+    function processData(indexHtml, downldText) {
+      let data = {
+        date: '--',
+        time: '--',
+        temp: '--',
+        tempMin: '--',
+        tempMax: '--',
+        tempMinTime: '',
+        tempMaxTime: '',
+        humidity: '--',
+        dailyRain: '0.0',
+        rainRate: '0.0',
+        etDaily: '--',
+        etHour: '--',
+        dew: '--',
+        st: '--',
+        windSpeed: '0.0',
+        windDir: '---',
+        windHi: '0.0'
+      };
 
-      if (dataLines.length === 0) return;
+      // 1. Extraer datos del index.html (generado desde index.htx cada 15 min)
+      if (indexHtml) {
+        // Fecha y Hora
+        const dateMatch = indexHtml.match(/Última actualización[\s\S]*?<h2[^>]*>[\s\S]*?([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4})\s*-\s*([0-9]{1,2}:[0-9]{2})/i)
+          || indexHtml.match(/([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4})\s*-\s*([0-9]{1,2}:[0-9]{2})/);
+        if (dateMatch) {
+          data.date = dateMatch[1].trim();
+          data.time = dateMatch[2].trim();
+        }
 
-      const lastLine = dataLines[dataLines.length - 1];
-      const tokens = lastLine.trim().split(/\s+/);
+        // Temperatura Actual
+        const tempMatch = indexHtml.match(/<h3[^>]*>[\s\S]*?Temperatura[\s\S]*?<\/h3>[\s\S]*?<span[^>]*class=["'][^"']*text-3xl[^"']*["'][^>]*>([0-9.,-]+)/i);
+        if (tempMatch) {
+          data.temp = tempMatch[1].trim();
+        }
 
-      const dateStr = tokens[0];
-      const timeStr = tokens[1];
-      const tempVal = tokens[2];
-      const humidityVal = tokens[5];
-      
-      // Índice 15 para Rain: Sanitizado para evitar '---'
-      let rainVal = tokens[15];
-      if (!rainVal || rainVal === '---') {
-        rainVal = '0.00';
+        // Máx y Mín Diaria
+        const dailyTempMatch = indexHtml.match(/<td[^>]*>\s*Diaria\s*<\/td>[\s\S]*?<td[^>]*>\s*([0-9.,-]+)[^<]*<\/td>[\s\S]*?<td[^>]*>\s*([0-9.,-]+)[^<]*<\/td>/i);
+        if (dailyTempMatch) {
+          data.tempMin = dailyTempMatch[1].trim();
+          data.tempMax = dailyTempMatch[2].trim();
+        }
+
+        // Horas de Mín y Máx Diaria
+        const dailyTimeMatch = indexHtml.match(/<td[^>]*>\s*A hs:\s*<\/td>[\s\S]*?<td[^>]*>\s*([0-9]{1,2}:[0-9]{2})\s*<\/td>[\s\S]*?<td[^>]*>\s*([0-9]{1,2}:[0-9]{2})\s*<\/td>/i);
+        if (dailyTimeMatch) {
+          data.tempMinTime = dailyTimeMatch[1].trim();
+          data.tempMaxTime = dailyTimeMatch[2].trim();
+        }
+
+        // Humedad Actual
+        const humMatch = indexHtml.match(/<h3[^>]*>[\s\S]*?Humedad[\s\S]*?<\/h3>[\s\S]*?<span[^>]*class=["'][^"']*text-3xl[^"']*["'][^>]*>([0-9]+)/i);
+        if (humMatch) {
+          data.humidity = humMatch[1].trim();
+        }
+
+        // Precipitación / Lluvia del Día
+        const rainMatch = indexHtml.match(/Lluvia del D[ií]a[\s\S]*?<p[^>]*class=["'][^"']*text-xl[^"']*["'][^>]*>([0-9.,]+)\s*mm/i);
+        if (rainMatch) {
+          data.dailyRain = rainMatch[1].trim();
+        }
+        const rainRateMatch = indexHtml.match(/Intensidad Actual[\s\S]*?<p[^>]*class=["'][^"']*text-xl[^"']*["'][^>]*>([0-9.,]+)\s*mm\/hr/i);
+        if (rainRateMatch) {
+          data.rainRate = rainRateMatch[1].trim();
+        }
+
+        // ET Diaria (Acumulada)
+        const etDailyMatch = indexHtml.match(/ET Diaria[\s\S]*?<p[^>]*class=["'][^"']*text-xl[^"']*["'][^>]*>([0-9.,]+)\s*mm/i);
+        if (etDailyMatch) {
+          data.etDaily = etDailyMatch[1].trim();
+        }
+
+        // Punto de Rocío
+        const dewMatch = indexHtml.match(/Punto de Roc[ií]o Actual[\s\S]*?<span[^>]*>([0-9.,-]+)/i);
+        if (dewMatch) {
+          data.dew = dewMatch[1].trim();
+        }
+
+        // Sensación Térmica
+        const heatMatch = indexHtml.match(/[IÍ]ndice de Calor[\s\S]*?<span[^>]*>([0-9.,-]+)/i);
+        const chillMatch = indexHtml.match(/Sensaci[oó]n por Viento[\s\S]*?<span[^>]*>([0-9.,-]+)/i);
+        const numTemp = parseFloat(data.temp);
+        if (!isNaN(numTemp)) {
+          if (numTemp >= 21 && heatMatch) {
+            data.st = heatMatch[1].trim();
+          } else if (numTemp < 15 && chillMatch) {
+            data.st = chillMatch[1].trim();
+          } else {
+            data.st = data.temp;
+          }
+        }
+
+        // Viento
+        const windSpeedMatch = indexHtml.match(/Velocidad Actual[\s\S]*?<p[^>]*class=["'][^"']*text-2xl[^"']*["'][^>]*>([0-9.,]+)/i);
+        if (windSpeedMatch) {
+          data.windSpeed = windSpeedMatch[1].trim();
+        }
+        const windDirMatch = indexHtml.match(/Direcci[oó]n[\s\S]*?<p[^>]*class=["'][^"']*text-2xl[^"']*["'][^>]*>([A-Za-z\-]+)/i);
+        if (windDirMatch) {
+          data.windDir = windDirMatch[1].trim();
+        }
+        const hiWindMatch = indexHtml.match(/R[aá]faga M[aá]xima Diaria[\s\S]*?<td[^>]*class=["'][^"']*font-semibold[^"']*["'][^>]*>([0-9.,]+)/i);
+        if (hiWindMatch) {
+          data.windHi = hiWindMatch[1].trim();
+        }
       }
 
-      document.getElementById('temp-val').innerText = tempVal;
-      document.getElementById('humidity-val').innerText = humidityVal;
-      document.getElementById('rain-val').innerText = rainVal;
-      document.getElementById('last-update').innerText = `Último registro: ${dateStr} ${timeStr} hs`;
+      // 2. Extraer ET última hora y fallbacks desde downld02.txt
+      if (downldText) {
+        const lines = downldText.trim().split('\n').filter(l => l.trim().length > 0);
+        const headerLine = lines.find(l => /Date\s+Time/i.test(l));
+        const headers = headerLine ? headerLine.trim().split(/\s+/).map(h => h.toLowerCase()) : [];
+        const dataLines = lines.filter(l => /^\s*\d{1,2}\/\d{2}\/\d{2}/.test(l));
+
+        if (dataLines.length > 0) {
+          const lastLine = dataLines[dataLines.length - 1];
+          const tokens = lastLine.trim().split(/\s+/);
+
+          // ET última hora
+          const etIdx = headers.findIndex(h => /^et$/i.test(h));
+          if (etIdx !== -1 && tokens[etIdx] && tokens[etIdx] !== '---') {
+            data.etHour = tokens[etIdx];
+          }
+
+          // Fallbacks si falta algo en index.html
+          if (data.temp === '--') data.temp = tokens[2] || '--';
+          if (data.tempMax === '--') data.tempMax = tokens[3] || '--';
+          if (data.tempMin === '--') data.tempMin = tokens[4] || '--';
+          if (data.humidity === '--') {
+            const humIdx = headers.findIndex(h => /^hum$/i.test(h));
+            if (humIdx !== -1) data.humidity = tokens[humIdx];
+          }
+          if (data.date === '--') data.date = tokens[0] || '--';
+          if (data.time === '--') data.time = tokens[1] || '--';
+          if (data.etDaily === '--' && data.etHour !== '--') data.etDaily = data.etHour;
+          if (data.windSpeed === '0.0') {
+            const spdIdx = headers.findIndex(h => /^speed$/i.test(h));
+            if (spdIdx !== -1) data.windSpeed = tokens[spdIdx];
+          }
+          if (data.windDir === '---') {
+            const dirIdx = headers.findIndex(h => /^dir$/i.test(h));
+            if (dirIdx !== -1) data.windDir = tokens[dirIdx];
+          }
+        }
+      }
+
+      // Renderizar valores en la UI
+      document.getElementById('temp-val').innerText = data.temp;
+      document.getElementById('temp-time').innerText = data.time;
+      document.getElementById('temp-hi').innerText = data.tempMax;
+      document.getElementById('temp-hi-time').innerText = data.tempMaxTime ? `(${data.tempMaxTime})` : '';
+      document.getElementById('temp-low').innerText = data.tempMin;
+      document.getElementById('temp-low-time').innerText = data.tempMinTime ? `(${data.tempMinTime})` : '';
+      document.getElementById('st-val').innerText = data.st !== '--' ? data.st : data.temp;
+      document.getElementById('dew-val').innerText = data.dew;
+
+      document.getElementById('humidity-val').innerText = data.humidity;
+      document.getElementById('rain-val').innerText = data.dailyRain;
+      document.getElementById('rain-rate-val').innerText = data.rainRate;
+
+      // Evapotranspiración (ET)
+      document.getElementById('et-daily-val').innerText = data.etDaily;
+      document.getElementById('et-daily-sub').innerText = `${data.etDaily} mm`;
+      document.getElementById('et-hour-val').innerText = data.etHour !== '--' ? `${data.etHour} mm` : '--';
+
+      // Viento
+      document.getElementById('wind-speed-val').innerText = data.windSpeed;
+      document.getElementById('wind-dir-val').innerText = (data.windDir === '---' || !data.windDir) ? 'Calma' : data.windDir;
+      document.getElementById('wind-hi-val').innerText = `${data.windHi} km/h`;
+
+      document.getElementById('last-update').innerText = `${data.date} • ${data.time} hs`;
+
+      lucide.createIcons();
     }
 
-    // Service Worker PWA
+    // Lógica PWA e Instalación en Pantalla de Inicio
+    let deferredPrompt = null;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btn-header-install').classList.remove('hidden');
+
+      // Si es la primera vez que abre la app en el celular, mostrar modal automáticamente
+      checkFirstTimeOpen();
+    });
+
+    function checkFirstTimeOpen() {
+      if (isStandalone) return; // Ya está instalada como PWA
+      const hasShown = localStorage.getItem('pwa_prompt_opened');
+      if (!hasShown) {
+        openInstallModal();
+      } else {
+        // Asegurar que el botón del header esté disponible
+        document.getElementById('btn-header-install').classList.remove('hidden');
+      }
+    }
+
+    function openInstallModal() {
+      const modal = document.getElementById('install-modal');
+      const iosGuide = document.getElementById('ios-instructions');
+      const actionBtn = document.getElementById('btn-install-action');
+
+      if (isIos) {
+        iosGuide.classList.remove('hidden');
+        actionBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Seguir pasos arriba</span>';
+      } else {
+        iosGuide.classList.add('hidden');
+        actionBtn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i><span>Agregar a Pantalla de Inicio</span>';
+      }
+
+      modal.classList.remove('hidden');
+      document.getElementById('btn-header-install').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    async function handleInstallClick() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          dismissInstallModal();
+        }
+        deferredPrompt = null;
+      } else if (isIos) {
+        dismissInstallModal();
+      } else {
+        alert('Para agregar el ícono, abrí el menú de tu navegador (los 3 puntos ⋮ arriba a la derecha) y seleccioná "Instalar aplicación" o "Agregar a la pantalla principal".');
+        dismissInstallModal();
+      }
+    }
+
+    function dismissInstallModal() {
+      document.getElementById('install-modal').classList.add('hidden');
+      localStorage.setItem('pwa_prompt_opened', 'true');
+    }
+
+    // Service Worker básico para PWA
     if ('serviceWorker' in navigator) {
       const swCode = `
         self.addEventListener('install', e => self.skipWaiting());
@@ -184,24 +579,11 @@
       navigator.serviceWorker.register(URL.createObjectURL(blobSW)).catch(() => {});
     }
 
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('install-banner').classList.remove('hidden');
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchWeatherData();
+      // Verificar si es 1ra vez luego de 1 segundo de carga
+      setTimeout(checkFirstTimeOpen, 1000);
     });
-
-    document.getElementById('btn-install').addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        document.getElementById('install-banner').classList.add('hidden');
-      }
-      deferredPrompt = null;
-    });
-
-    window.addEventListener('DOMContentLoaded', fetchWeatherData);
   </script>
 </body>
 </html>
