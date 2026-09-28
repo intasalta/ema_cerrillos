@@ -1,5 +1,6 @@
 import os
 import math
+import unicodedata
 import pandas as pd
 from supabase import create_client, Client
 
@@ -15,54 +16,75 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # ID de la estación (Asegúrate de que coincida con el ID registrado en la tabla 'estaciones')
 ESTACION_ID = "ema_cerrillos"
 
-# 2. Diccionario Maestro de Mapeo (Cubre todas las estaciones Davis con o sin ET/Radiación)
-COLUMN_MAP = {
-    'Temp Ext (°C)': 'temp_ext',
-    'Temp Máx': 'temp_max',
-    'Temp Mín': 'temp_min',
-    'Humedad Ext (%)': 'humedad_ext',
-    'Punto Rocío': 'punto_rocio',
-    'Vel Vent': 'vel_vent',
-    'Dir Vent': 'dir_vent',
-    'Wind Run': 'wind_run',
-    'Ráfaga Vent': 'rafaga_vent',
-    'Dir Ráfaga': 'dir_rafaga',
-    'Vel Máx': 'vel_max',
-    'Dir Máx': 'dir_max',
-    'Sens Term Wind': 'sens_term_wind',
-    'Índice Calor': 'indice_calor',
-    'THW Index': 'thw',
-    'THW': 'thw',
-    'THSW': 'thsw',
-    'Presión (hPa)': 'presion',
-    'Lluvia (mm)': 'lluvia',
-    'Int Lluvia': 'int_lluvia',
-    'Rad Solar': 'rad_solar',
-    'Energía Solar': 'energia_solar',
-    'Rad Solar Máx': 'rad_solar_max',
-    'UV': 'uv',
-    'Dosis UV': 'dosis_uv',
-    'UV Máx': 'uv_max',
-    'Heat D-D': 'heat_dd',
-    'Cool D-D': 'cool_dd',
-    'Grados Día H': 'grados_dia_h',
-    'Grados Día C': 'grados_dia_c',
-    'Grados Día F': 'grados_dia_f',
-    'Temp Int': 'temp_int',
-    'Humedad Int': 'humedad_int',
-    'Punto Rocío Int': 'punto_rocio_int',
-    'Heat Int': 'heat_int',
-    'EMC Int': 'emc_int',
-    'Densidad Aire Int': 'densidad_aire_int',
-    'ET': 'et',
-    'Muestras Vent': 'muestras_vent',
-    'Tx Vent': 'tx_vent',
-    'Recepción ISS': 'recepcion_iss',
-    'Intervalo Arc': 'intervalo_arc'
+# 2. Diccionario de mapeo en minúsculas y sin acentos/símbolos para evitar problemas de encoding
+NORMALIZED_COLUMN_MAP = {
+    'temp ext (c)': 'temp_ext',
+    'temp ext (c)': 'temp_ext',
+    'temp ext': 'temp_ext',
+    'temp max': 'temp_max',
+    'temp min': 'temp_min',
+    'humedad ext (%)': 'humedad_ext',
+    'humedad ext': 'humedad_ext',
+    'punto rocio': 'punto_rocio',
+    'vel vent': 'vel_vent',
+    'dir vent': 'dir_vent',
+    'wind run': 'wind_run',
+    'rafaga vent': 'rafaga_vent',
+    'dir rafaga': 'dir_rafaga',
+    'vel max': 'vel_max',
+    'dir max': 'dir_max',
+    'sens term wind': 'sens_term_wind',
+    'indice calor': 'indice_calor',
+    'thw index': 'thw',
+    'thw': 'thw',
+    'thsw': 'thsw',
+    'presion (hpa)': 'presion',
+    'presion': 'presion',
+    'lluvia (mm)': 'lluvia',
+    'lluvia': 'lluvia',
+    'int lluvia': 'int_lluvia',
+    'rad solar': 'rad_solar',
+    'energia solar': 'energia_solar',
+    'rad solar max': 'rad_solar_max',
+    'uv': 'uv',
+    'dosis uv': 'dosis_uv',
+    'uv max': 'uv_max',
+    'heat d-d': 'heat_dd',
+    'cool d-d': 'cool_dd',
+    'grados dia h': 'grados_dia_h',
+    'grados dia c': 'grados_dia_c',
+    'grados dia f': 'grados_dia_f',
+    'temp int': 'temp_int',
+    'humedad int': 'humedad_int',
+    'punto rocio int': 'punto_rocio_int',
+    'heat int': 'heat_int',
+    'emc int': 'emc_int',
+    'densidad aire int': 'densidad_aire_int',
+    'et': 'et',
+    'muestras vent': 'muestras_vent',
+    'tx vent': 'tx_vent',
+    'recepcion iss': 'recepcion_iss',
+    'intervalo arc': 'intervalo_arc'
 }
 
+def normalize_text(text):
+    """Convierte texto a minúsculas, remueve tildes y arregla caracteres mal codificados."""
+    if not isinstance(text, str):
+        return ""
+    # Corregir mojibake si ocurrió al leer en latin1
+    try:
+        text = text.encode('latin1').decode('utf-8')
+    except Exception:
+        pass
+    
+    # Quitar tildes y caracteres especiales como °
+    text = text.replace('°', '').replace('Â', '')
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    return text.lower().strip()
+
 def clean_val(val):
-    """Limpia textos sin datos ('---', '---.-') y convierte NaN a None para PostgreSQL."""
+    """Limpia valores nulos y textos como '---'."""
     if pd.isna(val):
         return None
     val_str = str(val).strip()
@@ -73,23 +95,38 @@ def clean_val(val):
     return val
 
 def sync():
-    # Detecta downld08.csv o downld02.csv según el que exista en el repositorio
     csv_file = 'downld08.csv' if os.path.exists('downld08.csv') else 'downld02.csv'
     if not os.path.exists(csv_file):
-        print(f"No se encontró ningún archivo CSV para procesar.")
+        print(f"No se encontró ningún archivo CSV en el directorio.")
         return
 
-    print(f"Leyendo datos desde {csv_file}...")
+    print(f"Leyendo archivo: {csv_file}")
     df = pd.read_csv(csv_file, encoding='latin1')
 
-    # Parsear Fecha y Hora garantizando la zona horaria de Argentina (-03:00)
+    # Mapear dinámicamente las columnas del CSV usando el texto normalizado
+    col_mapping_real = {}
+    for col in df.columns:
+        norm_col = normalize_text(col)
+        if norm_col in NORMALIZED_COLUMN_MAP:
+            col_mapping_real[col] = NORMALIZED_COLUMN_MAP[norm_col]
+        else:
+            print(f"Columna no reconocida o sin mapeo: '{col}' (normalizada: '{norm_col}')")
+
+    # Identificar nombres reales de Fecha y Hora
+    fecha_col = next((c for c in df.columns if normalize_text(c) == 'fecha'), None)
+    hora_col = next((c for c in df.columns if normalize_text(c) == 'hora'), None)
+
+    if not fecha_col or not hora_col:
+        print("Error: No se encontraron las columnas de Fecha u Hora.")
+        return
+
+    # Convertir Fecha y Hora a ISO Timestamptz de Argentina (-03:00)
     df['fecha_hora'] = pd.to_datetime(
-        df['Fecha'].astype(str) + ' ' + df['Hora'].astype(str), 
+        df[fecha_col].astype(str) + ' ' + df[hora_col].astype(str), 
         format='%d/%m/%y %H:%M',
         errors='coerce'
     ).dt.strftime('%Y-%m-%dT%H:%M:%S-03:00')
 
-    # Filtrar registros que no hayan podido parsear la fecha
     df = df.dropna(subset=['fecha_hora'])
 
     records = []
@@ -99,21 +136,20 @@ def sync():
             'fecha_hora': row['fecha_hora']
         }
         
-        for csv_col, db_col in COLUMN_MAP.items():
-            if csv_col in row:
-                val = clean_val(row[csv_col])
-                if val is not None:
-                    record[db_col] = val
+        for csv_col, db_col in col_mapping_real.items():
+            val = clean_val(row[csv_col])
+            if val is not None:
+                record[db_col] = val
 
         records.append(record)
 
     if not records:
-        print("No hay registros válidos para procesar.")
+        print("No hay registros procesables.")
         return
 
-    print(f"Procesando y volcando {len(records)} registros a Supabase...")
+    print(f"Subiendo {len(records)} registros corregidos a Supabase...")
 
-    # Realizar la carga en lotes de 100 registros con UPSERT
+    # Cargar en lotes de 100 con upsert
     chunk_size = 100
     for i in range(0, len(records), chunk_size):
         chunk = records[i:i + chunk_size]
@@ -122,7 +158,7 @@ def sync():
             on_conflict="estacion_id,fecha_hora"
         ).execute()
 
-    print("¡Sincronización completada con éxito sin campos vacíos!")
+    print("¡Sincronización finalizada exitosamente! Todos los campos han sido procesados.")
 
 if __name__ == "__main__":
     sync()
