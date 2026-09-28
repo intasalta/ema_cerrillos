@@ -121,12 +121,13 @@ def sync():
         return
 
     # Convertir Fecha y Hora a ISO Timestamptz de Argentina (-03:00)
+   
     df['fecha_hora'] = pd.to_datetime(
         df[fecha_col].astype(str) + ' ' + df[hora_col].astype(str), 
         format='%d/%m/%y %H:%M',
         errors='coerce'
-    ).dt.strftime('%Y-%m-%dT%H:%M:%S-03:00')
-
+    ).dt.strftime('%Y-%m-%d %H:%M:%S')
+    
     df = df.dropna(subset=['fecha_hora'])
 
     records = []
