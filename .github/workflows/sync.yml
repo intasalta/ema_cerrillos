@@ -1,16 +1,19 @@
 name: Sincronizar EMA Cerrillos con Supabase
 
 on:
-  # Se ejecuta automáticamente cada vez que se actualiza el archivo downld08.csv en main
-  push:
-    paths:
-      - 'downld08.csv'
-  # Permite ejecutarlo manualmente desde la pestaña Actions en GitHub
+  # Se ejecuta automáticamente al finalizar con éxito la conversión del TXT a CSV
+  workflow_run:
+    workflows: ["Convert Meteorologic Data to CSV and XLSX"]
+    types:
+      - completed
+
+  # Permite ejecutarlo manualmente desde la pestaña Actions
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Descargar repositorio
