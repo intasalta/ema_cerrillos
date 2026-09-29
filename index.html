@@ -111,7 +111,7 @@
         <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">Última actualización</span>
         <h2 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2 mt-0.5">
           <i data-feather="clock" class="text-sky-500 h-5 w-5"></i>
-          29/09/26 -  9:00
+          29/09/26 -  9:07
         </h2>
       </div>
 
@@ -164,7 +164,7 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
               <i data-feather="thermometer" class="h-5 w-5 text-red-500"></i> Temperatura
             </h3>
-            <span class="text-3xl font-extrabold text-slate-900 dark:text-white">19.7<span>°C</span></span>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white">20.1<span>°C</span></span>
           </div>
 
           <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
@@ -283,7 +283,7 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Sensación por Viento</p>
               <p class="text-[10px] text-slate-400">Wind Chill</p>
             </div>
-            <span class="text-xl font-bold text-slate-800 dark:text-white">19.7°C</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-white">20.1°C</span>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
@@ -291,14 +291,14 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Índice de Calor</p>
               <p class="text-[10px] text-slate-400">Temp + Humedad</p>
             </div>
-            <span class="text-xl font-bold text-slate-800 dark:text-white">20.8°C</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-white">21.2°C</span>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
             <div>
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Punto de Rocío Actual</p>
             </div>
-            <span class="text-lg font-bold text-slate-800 dark:text-white">18.9°C</span>
+            <span class="text-lg font-bold text-slate-800 dark:text-white">19.2°C</span>
           </div>
         </div>
 
@@ -418,11 +418,11 @@
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-400 font-medium">Velocidad Actual</p>
-              <p class="text-2xl font-bold text-slate-800 dark:text-white">0.0 <span class="text-xs font-normal text-slate-400">km/hr</span></p>
+              <p class="text-2xl font-bold text-slate-800 dark:text-white">1.6 <span class="text-xs font-normal text-slate-400">km/hr</span></p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-400 font-medium">Dirección Sector</p>
-              <p class="text-2xl font-bold text-sky-600 dark:text-sky-400">SW</p>
+              <p class="text-2xl font-bold text-sky-600 dark:text-sky-400">WSW</p>
             </div>
           </div>
 
@@ -489,12 +489,12 @@
               <tr>
                 <td class="py-2 font-medium">Diaria</td>
                 <td class="py-2 text-center font-semibold">870.7 hPa</td>
-                <td class="py-2 text-center font-semibold">874.3 hPa</td>
+                <td class="py-2 text-center font-semibold">874.4 hPa</td>
               </tr>
               <tr class="text-[10px] text-slate-400">
                 <td class="py-1">A hs:</td>
                 <td class="py-1 text-center"> 5:21</td>
-                <td class="py-1 text-center"> 8:51</td>
+                <td class="py-1 text-center"> 9:01</td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Mensual</td>
@@ -657,59 +657,57 @@
     // LECTURA DINÁMICA DE ACUMULADO ANUAL DESDE NOAAYR.TXT
     // =========================================================================
     async function cargarAcumuladoAnualNOAA() {
-      try {
-        let res = await fetch('NOAAYR.TXT?t=' + new Date().getTime());
-        if (!res.ok) {
-          res = await fetch('../NOAAYR.TXT?t=' + new Date().getTime());
-        }
-        if (!res.ok) return;
+	  try {
+		let res = await fetch('NOAAYR.TXT?t=' + new Date().getTime());
+		if (!res.ok) {
+		  res = await fetch('../NOAAYR.TXT?t=' + new Date().getTime());
+		}
+		if (!res.ok) return;
 
-        const text = await res.text();
-        const lines = text.split(/\r?\n/);
-        
-        let rainColIdx = -1;
-        let totalLine = null;
+		const text = await res.text();
+		const lines = text.split(/\r?\n/);
 
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          
-          // Buscar encabezado que contiene la columna Rain
-          if (line.includes('Rain') && rainColIdx === -1) {
-            const headerTokens = line.split(/\s+/);
-            rainColIdx = headerTokens.findIndex(tok => tok.toLowerCase() === 'rain');
-          }
-          
-          // La última línea con contenido relevante en NOAAYR suele tener el total
-          if (line.length > 0) {
-            totalLine = line;
-          }
-        }
+		let enSeccionPrecipitacion = false;
+		let valorAcumulado = null;
 
-        if (totalLine) {
-          const parts = totalLine.split(/\s+/);
-          let rainValue = null;
+		for (let i = 0; i < lines.length; i++) {
+		  const line = lines[i].trim();
 
-          if (rainColIdx !== -1 && rainColIdx < parts.length) {
-            rainValue = parts[rainColIdx];
-          } else {
-            // Si varía la posición del encabezado, tomar la antepenúltima/penúltima columna numérica
-            const numParts = parts.filter(p => !isNaN(parseFloat(p)));
-            if (numParts.length > 0) {
-              rainValue = numParts[numParts.length - 1];
-            }
-          }
+		  // Detectar la sección de PRECIPITATION
+		  if (line.includes('PRECIPITATION')) {
+			enSeccionPrecipitacion = true;
+			continue;
+		  }
 
-          if (rainValue && !isNaN(parseFloat(rainValue))) {
-            const container = document.getElementById('acumulado-anual-val');
-            if (container) {
-              container.innerText = `${parseFloat(rainValue).toFixed(1)} mm`;
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error al cargar NOAAYR.TXT:", err);
-      }
-    }
+		  // Si entramos a otra sección (ej. WIND SPEED), dejamos de buscar
+		  if (enSeccionPrecipitacion && line.includes('WIND SPEED')) {
+			break;
+		  }
+
+		  // Buscar el total en la línea divisoria final de la tabla de precipitación
+		  if (enSeccionPrecipitacion && line.startsWith('---------------------------------------------')) {
+			// La línea siguiente contiene los totales de precipitación
+			if (i + 1 < lines.length) {
+			  const totalLine = lines[i + 1].trim();
+			  const tokens = totalLine.split(/\s+/);
+			  if (tokens.length > 0 && !isNaN(parseFloat(tokens[0]))) {
+				valorAcumulado = parseFloat(tokens[0]);
+			  }
+			}
+			break;
+		  }
+		}
+
+		if (valorAcumulado !== null && !isNaN(valorAcumulado)) {
+		  const container = document.getElementById('acumulado-anual-val');
+		  if (container) {
+			container.innerText = `${valorAcumulado.toFixed(1)} mm`;
+		  }
+		}
+	  } catch (err) {
+		console.error("Error al cargar NOAAYR.TXT:", err);
+	  }
+	}
 
     // =========================================================================
     // 4. PARSER Y RENDERIZADO DE GRÁFICOS DINÁMICOS ONLINE (downld02.txt)
