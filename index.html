@@ -111,7 +111,7 @@
         <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">Última actualización</span>
         <h2 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2 mt-0.5">
           <i data-feather="clock" class="text-sky-500 h-5 w-5"></i>
-          29/09/26 -  8:45
+          29/09/26 -  9:00
         </h2>
       </div>
 
@@ -127,7 +127,7 @@
           <button id="btn-rango-48h" onclick="cambiarRangoHoras(48)" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800 transition-all text-xs font-semibold">
             48 hs
           </button>
-          <button onclick="cargarDatosDownld()" title="Recargar gráficos dinámicos" class="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-white/50 dark:hover:bg-slate-800 transition-all border-l border-slate-200 dark:border-slate-700/60 pl-2 ml-0.5">
+          <button onclick="cargarDatosDownld(); cargarAcumuladoAnualNOAA();" title="Recargar gráficos dinámicos" class="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-white/50 dark:hover:bg-slate-800 transition-all border-l border-slate-200 dark:border-slate-700/60 pl-2 ml-0.5">
             <i id="icon-refresh-dash" data-feather="refresh-cw" class="h-3.5 w-3.5"></i>
           </button>
         </div>
@@ -164,7 +164,7 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
               <i data-feather="thermometer" class="h-5 w-5 text-red-500"></i> Temperatura
             </h3>
-            <span class="text-3xl font-extrabold text-slate-900 dark:text-white">19.6<span>°C</span></span>
+            <span class="text-3xl font-extrabold text-slate-900 dark:text-white">19.7<span>°C</span></span>
           </div>
 
           <table class="w-full text-xs text-left text-slate-600 dark:text-slate-300">
@@ -283,7 +283,7 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Sensación por Viento</p>
               <p class="text-[10px] text-slate-400">Wind Chill</p>
             </div>
-            <span class="text-xl font-bold text-slate-800 dark:text-white">19.6°C</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-white">19.7°C</span>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
@@ -291,14 +291,14 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Índice de Calor</p>
               <p class="text-[10px] text-slate-400">Temp + Humedad</p>
             </div>
-            <span class="text-xl font-bold text-slate-800 dark:text-white">20.6°C</span>
+            <span class="text-xl font-bold text-slate-800 dark:text-white">20.8°C</span>
           </div>
 
           <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
             <div>
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Punto de Rocío Actual</p>
             </div>
-            <span class="text-lg font-bold text-slate-800 dark:text-white">18.7°C</span>
+            <span class="text-lg font-bold text-slate-800 dark:text-white">18.9°C</span>
           </div>
         </div>
 
@@ -351,7 +351,7 @@
 
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 col-span-2">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Acumulado Anual</p>
-              <p class="text-xl font-bold text-slate-900 dark:text-white">12075.6 mm</p>
+              <p id="acumulado-anual-val" class="text-xl font-bold text-slate-900 dark:text-white">-- mm</p>
             </div>
           </div>
         </div>
@@ -380,11 +380,11 @@
           <div class="grid grid-cols-2 gap-3 text-sm mb-4">
             <div class="bg-amber-50/70 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-100 dark:border-amber-900/40">
               <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">ET Diaria</p>
-              <p class="text-xl font-bold text-amber-950 dark:text-amber-200">0.08 mm</p>
+              <p class="text-xl font-bold text-amber-950 dark:text-amber-200">0.18 mm</p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">ET Mensual</p>
-              <p class="text-xl font-bold text-slate-800 dark:text-white">95.83 mm</p>
+              <p class="text-xl font-bold text-slate-800 dark:text-white">95.94 mm</p>
             </div>
           </div>
         </div>
@@ -422,7 +422,7 @@
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-400 font-medium">Dirección Sector</p>
-              <p class="text-2xl font-bold text-sky-600 dark:text-sky-400">SSW</p>
+              <p class="text-2xl font-bold text-sky-600 dark:text-sky-400">SW</p>
             </div>
           </div>
 
@@ -469,7 +469,7 @@
           <div class="grid grid-cols-2 gap-3 text-sm mb-4">
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Presión Actual</p>
-              <p class="text-xl font-bold text-slate-900 dark:text-white">874.2 hPa</p>
+              <p class="text-xl font-bold text-slate-900 dark:text-white">874.3 hPa</p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
               <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Tendencia (3 hs)</p>
@@ -494,7 +494,7 @@
               <tr class="text-[10px] text-slate-400">
                 <td class="py-1">A hs:</td>
                 <td class="py-1 text-center"> 5:21</td>
-                <td class="py-1 text-center"> 8:29</td>
+                <td class="py-1 text-center"> 8:51</td>
               </tr>
               <tr>
                 <td class="py-2 font-medium">Mensual</td>
@@ -654,6 +654,64 @@
     });
 
     // =========================================================================
+    // LECTURA DINÁMICA DE ACUMULADO ANUAL DESDE NOAAYR.TXT
+    // =========================================================================
+    async function cargarAcumuladoAnualNOAA() {
+      try {
+        let res = await fetch('NOAAYR.TXT?t=' + new Date().getTime());
+        if (!res.ok) {
+          res = await fetch('../NOAAYR.TXT?t=' + new Date().getTime());
+        }
+        if (!res.ok) return;
+
+        const text = await res.text();
+        const lines = text.split(/\r?\n/);
+        
+        let rainColIdx = -1;
+        let totalLine = null;
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          // Buscar encabezado que contiene la columna Rain
+          if (line.includes('Rain') && rainColIdx === -1) {
+            const headerTokens = line.split(/\s+/);
+            rainColIdx = headerTokens.findIndex(tok => tok.toLowerCase() === 'rain');
+          }
+          
+          // La última línea con contenido relevante en NOAAYR suele tener el total
+          if (line.length > 0) {
+            totalLine = line;
+          }
+        }
+
+        if (totalLine) {
+          const parts = totalLine.split(/\s+/);
+          let rainValue = null;
+
+          if (rainColIdx !== -1 && rainColIdx < parts.length) {
+            rainValue = parts[rainColIdx];
+          } else {
+            // Si varía la posición del encabezado, tomar la antepenúltima/penúltima columna numérica
+            const numParts = parts.filter(p => !isNaN(parseFloat(p)));
+            if (numParts.length > 0) {
+              rainValue = numParts[numParts.length - 1];
+            }
+          }
+
+          if (rainValue && !isNaN(parseFloat(rainValue))) {
+            const container = document.getElementById('acumulado-anual-val');
+            if (container) {
+              container.innerText = `${parseFloat(rainValue).toFixed(1)} mm`;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error al cargar NOAAYR.TXT:", err);
+      }
+    }
+
+    // =========================================================================
     // 4. PARSER Y RENDERIZADO DE GRÁFICOS DINÁMICOS ONLINE (downld02.txt)
     // =========================================================================
     let datosCrudosDownld = [];
@@ -707,7 +765,6 @@
       const rows = [];
       let started = false;
 
-      // 1. Detectar dinámicamente el índice de columna de 'ET' en el encabezado
       let etColIdx = -1;
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -741,8 +798,6 @@
         const dateStr = parts[0];
         const timeStr = parts[1];
 
-        // Extracción precisa de ET:
-        // Si se detectó la columna ET en el encabezado, usarla; de lo contrario, tomar parts[parts.length - 5]
         let rawEt = null;
         if (etColIdx >= 0 && etColIdx < parts.length) {
           rawEt = parts[etColIdx];
@@ -1063,7 +1118,6 @@
       const ets = rows.map(r => r.et || 0);
       const dews = rows.map(r => r.dewPt);
 
-      // 1. Calcular ET acumulada del día (se resetea cada medianoche a las 00:00 hs)
       let curDay = null;
       let curCum = 0;
       const etAcumDia = [];
@@ -1076,7 +1130,6 @@
         etAcumDia.push(parseFloat(curCum.toFixed(2)));
       });
 
-      // 2. ET de hoy: acumulado de la fecha más reciente registrada (coincide con ET Diaria)
       const lastDate = rows.length > 0 ? rows[rows.length - 1].dateStr : null;
       const etHoy = rows
         .filter(r => r.dateStr === lastDate)
@@ -1321,6 +1374,7 @@
     // Inicializar al cargar el DOM
     document.addEventListener("DOMContentLoaded", () => {
       cargarDatosDownld();
+      cargarAcumuladoAnualNOAA();
     });
   </script>
   
