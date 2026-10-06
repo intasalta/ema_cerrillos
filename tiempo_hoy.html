@@ -415,22 +415,35 @@
           }
         }
 
-        // Viento
-        const windSpeedMatch = indexHtml.match(/Velocidad Actual[\s\S]*?<p[^>]*class=["'][^"']*text-2xl[^"']*["'][^>]*>([0-9.,]+)/i);
+        // Viento (extraído exclusivamente de index.html generado con index.htx)
+        const windSpeedMatch = indexHtml.match(/id=["'](?:davis-raw-speed|wind-speed-main)["'][^>]*>([0-9.,]+)/i)
+          || indexHtml.match(/Velocidad Actual[\s\S]*?<span[^>]*id=["']wind-speed-main["'][^>]*>([0-9.,]+)/i)
+          || indexHtml.match(/Velocidad Actual[\s\S]*?<p[^>]*class=["'][^"']*text-2xl[^"']*["'][^>]*>([0-9.,]+)/i);
         if (windSpeedMatch) {
           data.windSpeed = windSpeedMatch[1].trim();
         }
-        const windDirMatch = indexHtml.match(/Direcci[oó]n[\s\S]*?<p[^>]*class=["'][^"']*text-2xl[^"']*["'][^>]*>([A-Za-z\-]+)/i);
+
+        const windDirMatch = indexHtml.match(/id=["'](?:davis-raw-dir|wind-dir-main)["'][^>]*>([A-Za-z0-9\-]+)/i)
+          || indexHtml.match(/Direcci[oó]n[\s\S]*?<span[^>]*id=["']wind-dir-main["'][^>]*>([A-Za-z0-9\-]+)/i)
+          || indexHtml.match(/Direcci[oó]n[\s\S]*?<p[^>]*class=["'][^"']*text-2xl[^"']*["'][^>]*>([A-Za-z\-]+)/i);
         if (windDirMatch) {
           data.windDir = windDirMatch[1].trim();
         }
-        const hiWindMatch = indexHtml.match(/R[aá]faga M[aá]xima Diaria[\s\S]*?<td[^>]*class=["'][^"']*font-semibold[^"']*["'][^>]*>([0-9.,]+)/i);
+
+        const windDegMatch = indexHtml.match(/id=["'](?:davis-raw-deg|wind-deg-main)["'][^>]*>([0-9]+)/i);
+        if (windDegMatch) {
+          data.windDeg = windDegMatch[1].trim();
+        }
+
+        const hiWindMatch = indexHtml.match(/id=["']davis-raw-hiwind["'][^>]*>([0-9.,]+)/i)
+          || indexHtml.match(/Diaria\s*<\/span>\s*<span[^>]*class=["'][^"']*font-bold[^"']*["'][^>]*>([0-9.,]+)/i)
+          || indexHtml.match(/R[aá]faga M[aá]xima Diaria[\s\S]*?<td[^>]*class=["'][^"']*font-semibold[^"']*["'][^>]*>([0-9.,]+)/i);
         if (hiWindMatch) {
           data.windHi = hiWindMatch[1].trim();
         }
       }
 
-      // 2. Extraer ET última hora y fallbacks desde downld02.txt
+      // 2. Extraer ET última hora y fallbacks desde downld02.txt (Nota: El viento NO se toma de downld02.txt)
       if (downldText) {
         const lines = downldText.trim().split('\n').filter(l => l.trim().length > 0);
         const headerLine = lines.find(l => /Date\s+Time/i.test(l));
@@ -447,7 +460,7 @@
             data.etHour = tokens[etIdx];
           }
 
-          // Fallbacks si falta algo en index.html
+          // Fallbacks si falta algo en index.html (temperatura, humedad, fecha/hora)
           if (data.temp === '--') data.temp = tokens[2] || '--';
           if (data.tempMax === '--') data.tempMax = tokens[3] || '--';
           if (data.tempMin === '--') data.tempMin = tokens[4] || '--';
@@ -458,14 +471,6 @@
           if (data.date === '--') data.date = tokens[0] || '--';
           if (data.time === '--') data.time = tokens[1] || '--';
           if (data.etDaily === '--' && data.etHour !== '--') data.etDaily = data.etHour;
-          if (data.windSpeed === '0.0') {
-            const spdIdx = headers.findIndex(h => /^speed$/i.test(h));
-            if (spdIdx !== -1) data.windSpeed = tokens[spdIdx];
-          }
-          if (data.windDir === '---') {
-            const dirIdx = headers.findIndex(h => /^dir$/i.test(h));
-            if (dirIdx !== -1) data.windDir = tokens[dirIdx];
-          }
         }
       }
 
@@ -488,10 +493,14 @@
       document.getElementById('et-daily-sub').innerText = `${data.etDaily} mm`;
       document.getElementById('et-hour-val').innerText = data.etHour !== '--' ? `${data.etHour} mm` : '--';
 
-      // Viento
-      document.getElementById('wind-speed-val').innerText = data.windSpeed;
-      document.getElementById('wind-dir-val').innerText = (data.windDir === '---' || !data.windDir) ? 'Calma' : data.windDir;
-      document.getElementById('wind-hi-val').innerText = `${data.windHi} km/h`;
+      // Viento (extraído exclusivamente de index.html)
+      document.getElementById('wind-speed-val').innerText = data.windSpeed !== '--' ? data.windSpeed : '0.0';
+      let dirDisplay = (data.windDir === '---' || !data.windDir) ? 'Calma' : data.windDir;
+      if (data.windDeg && dirDisplay !== 'Calma' && !dirDisplay.includes('(')) {
+        dirDisplay += ` (${data.windDeg}°)`;
+      }
+      document.getElementById('wind-dir-val').innerText = dirDisplay;
+      document.getElementById('wind-hi-val').innerText = data.windHi !== '--' ? `${data.windHi} km/h` : '--';
 
       document.getElementById('last-update').innerText = `${data.date} • ${data.time} hs`;
 
