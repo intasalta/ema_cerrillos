@@ -9,6 +9,30 @@
     "temp_min": 9.1,
     "lluvia_total": 36.4,
     "rafaga_max": 38.6,
-    "fecha_generacion": "2026-11-16 15:38:57"
+    "fecha_generacion": "2026-11-14 15:43:39"
+  },
+  {
+    "anio": 2026,
+    "mes": 9,
+    "mes_nombre": "Septiembre",
+    "archivo": "2026_09.pdf",
+    "temp_media": 16.4,
+    "temp_max": 36.7,
+    "temp_min": 2.3,
+    "lluvia_total": 26.2,
+    "rafaga_max": 37.0,
+    "fecha_generacion": "2026-11-16 13:18:24"
+  },
+  {
+    "anio": 2026,
+    "mes": 8,
+    "mes_nombre": "Agosto",
+    "archivo": "2026_08.pdf",
+    "temp_media": 14.3,
+    "temp_max": 36.8,
+    "temp_min": 0.8,
+    "lluvia_total": 6.0,
+    "rafaga_max": 40.2,
+    "fecha_generacion": "2026-11-16 14:15:06"
   }
 ]
